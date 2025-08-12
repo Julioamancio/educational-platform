@@ -10,7 +10,7 @@ import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import { useKV } from '@github/spark/hooks'
 import { Topic, Content } from '@/types'
-import { Plus, PencilSimple, Trash, FileText, Eye, EyeSlash, Clock, Image, VideoCamera, Upload, ArticleNyTimes } from '@phosphor-icons/react'
+import { Plus, PencilSimple, Trash, FileText, Eye, EyeSlash, Clock, Image, VideoCamera, Upload, ArticleNyTimes, Pencil as Edit } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import MediaUpload from '@/components/MediaUpload'
 

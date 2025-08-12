@@ -1,18 +1,32 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { useAuth } from '@/contexts/AuthContext'
 import { useKV } from '@github/spark/hooks'
 import { Topic, Content, Question, Attempt, StudyLog } from '@/types'
-import { Book, Question as QuestionIcon, TrendUp, Users, CheckCircle, GraduationCap, ClockCounterClockwise, Target } from '@phosphor-icons/react'
+import { Book, Question as QuestionIcon, TrendUp, Users, CheckCircle, GraduationCap, ClockCounterClockwise, Target, Plus, Database } from '@phosphor-icons/react'
+import { initializeSampleData } from '@/lib/sampleData'
+import { toast } from 'sonner'
 
 export default function Dashboard() {
   const { user } = useAuth()
-  const [topics] = useKV<Topic[]>('topics', [])
-  const [contents] = useKV<Content[]>('contents', [])
-  const [questions] = useKV<Question[]>('questions', [])
+  const [topics, setTopics] = useKV<Topic[]>('topics', [])
+  const [contents, setContents] = useKV<Content[]>('contents', [])
+  const [questions, setQuestions] = useKV<Question[]>('questions', [])
   const [attempts] = useKV<Attempt[]>('attempts', [])
   const [studyLogs] = useKV<StudyLog[]>('studyLogs', [])
-  const [users] = useKV<any[]>('users', [])
+  const [users, setUsers] = useKV<any[]>('users', [])
+
+  const loadSampleData = () => {
+    const sampleData = initializeSampleData()
+    setUsers(sampleData.users)
+    setTopics(sampleData.topics)
+    setContents(sampleData.contents)
+    setQuestions(sampleData.questions)
+    toast.success('Sample data loaded successfully!', {
+      description: 'The platform now has sample users, topics, content, and questions to explore.'
+    })
+  }
 
   if (user?.role === 'admin') {
     const totalStudents = users.filter(u => u.role === 'student').length
@@ -70,6 +84,32 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Quick Setup Card - Show when no data exists */}
+        {topics.length === 0 && questions.length === 0 && (
+          <Card className="border-2 border-dashed border-primary/50 bg-primary/5">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Database className="w-5 h-5 text-primary" />
+                Quick Setup
+              </CardTitle>
+              <CardDescription>
+                Get started quickly by loading sample data for testing and demonstration
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  This will create sample topics, questions, contents, and test users to help you explore the platform features.
+                </p>
+                <Button onClick={loadSampleData} className="w-full">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Load Sample Data
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>

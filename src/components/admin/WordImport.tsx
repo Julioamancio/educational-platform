@@ -87,9 +87,36 @@ export default function WordImport({ onQuestionsImported }: WordImportProps) {
   const parseQuestionsFromText = (text: string, images: string[]): ParsedQuestion[] => {
     const questions: ParsedQuestion[] = []
     
-    // Split text by common question separators
-    const sections = text.split(/(?:\n\s*\n|\d+\.\s|\bQuestion\s*\d+|\bQuestão\s*\d+)/i)
-      .filter(section => section.trim().length > 50) // Filter out very short sections
+    // More comprehensive question splitting patterns
+    const questionSeparators = [
+      /(\d+\.\s*)/g, // "1. ", "2. "
+      /(\bQuestion\s*\d+:?\s*)/gi, // "Question 1:", "Question 2"
+      /(\bQuestão\s*\d+:?\s*)/gi, // "Questão 1:", "Questão 2"
+      /(\bPergunta\s*\d+:?\s*)/gi, // "Pergunta 1:", "Pergunta 2"
+      /(\n\s*\n)/g // Double line breaks
+    ]
+    
+    // Try different splitting approaches
+    let sections: string[] = []
+    
+    // First, try splitting by numbered questions
+    sections = text.split(/(?=\d+\.\s)|(?=Question\s*\d+)|(?=Questão\s*\d+)/i)
+      .filter(section => section.trim().length > 30)
+    
+    // If no good sections found, try paragraph splitting
+    if (sections.length < 2) {
+      sections = text.split(/\n\s*\n/)
+        .filter(section => section.trim().length > 50)
+    }
+    
+    // If still no sections, try by option patterns
+    if (sections.length < 2) {
+      sections = text.split(/(?=\s*[A-E][\)\.]?\s*[A-Z])/)
+        .filter(section => {
+          const hasOptions = /[A-E][\)\.]?\s/.test(section)
+          return section.trim().length > 50 && hasOptions
+        })
+    }
 
     let imageIndex = 0
 
@@ -120,62 +147,129 @@ export default function WordImport({ onQuestionsImported }: WordImportProps) {
     // Clean and normalize the text
     const cleanText = section.replace(/\s+/g, ' ').trim()
     
-    // Look for option patterns (A), (B), etc. or A), B), etc.
-    const optionMatches = cleanText.match(/[A-E][\)\.]?\s*([^A-E\(\)]*?)(?=[A-E][\)\.]|$)/gi)
+    // More comprehensive option detection patterns
+    const optionPatterns = [
+      /([A-E])[\)\.]?\s*([^A-E\(\)\n]*?)(?=[A-E][\)\.]|\n|$)/gi, // A) text B) text
+      /\(([A-E])\)\s*([^A-E\(\)\n]*?)(?=\([A-E]\)|\n|$)/gi, // (A) text (B) text
+      /([A-E])\s*[-–]\s*([^A-E\n]*?)(?=[A-E]\s*[-–]|\n|$)/gi, // A - text B - text
+      /([A-E])\s*:\s*([^A-E\n]*?)(?=[A-E]\s*:|\n|$)/gi // A: text B: text
+    ]
     
-    if (!optionMatches || optionMatches.length < 3) {
+    let optionMatches: string[] = []
+    let optionsData: { [key: string]: string } = {}
+    
+    // Try each pattern until we find options
+    for (const pattern of optionPatterns) {
+      const matches = Array.from(cleanText.matchAll(pattern))
+      if (matches.length >= 3) {
+        matches.forEach(match => {
+          const letter = match[1].toLowerCase()
+          const text = match[2].trim()
+          if (text.length > 0 && ['a', 'b', 'c', 'd', 'e'].includes(letter)) {
+            optionsData[letter] = text
+          }
+        })
+        break
+      }
+    }
+    
+    // If no structured options found, try a more flexible approach
+    if (Object.keys(optionsData).length < 3) {
+      // Look for lines that start with letters
+      const lines = cleanText.split(/\n/)
+      const optionLines = lines.filter(line => 
+        /^[A-E][\)\.\-:]?\s+/.test(line.trim())
+      )
+      
+      optionLines.forEach(line => {
+        const match = line.match(/^([A-E])[\)\.\-:]?\s+(.+)/)
+        if (match) {
+          const letter = match[1].toLowerCase()
+          const text = match[2].trim()
+          if (['a', 'b', 'c', 'd', 'e'].includes(letter)) {
+            optionsData[letter] = text
+          }
+        }
+      })
+    }
+    
+    if (Object.keys(optionsData).length < 3) {
       return null // Need at least 3 options
     }
 
-    // Extract the question stem (text before first option)
-    const firstOptionIndex = cleanText.search(/[A-E][\)\.]/)
-    if (firstOptionIndex === -1) return null
+    // Extract the question stem
+    const optionTexts = Object.values(optionsData).join('|')
+    const optionRegex = new RegExp(`[A-E][\)\.\-:]?\\s*(?:${optionTexts.split('|')[0]})`, 'i')
+    const firstOptionIndex = cleanText.search(optionRegex)
     
-    const stem = cleanText.substring(0, firstOptionIndex).trim()
+    let stem = ''
+    if (firstOptionIndex !== -1) {
+      stem = cleanText.substring(0, firstOptionIndex).trim()
+    } else {
+      // Fallback: take first part of text
+      const firstLine = cleanText.split('\n')[0]
+      stem = firstLine.length > 20 ? firstLine : cleanText.substring(0, 200)
+    }
+    
+    // Clean up the stem
+    stem = stem.replace(/^\d+\.\s*/, '') // Remove leading numbers
+             .replace(/^Question\s*\d*:?\s*/i, '') // Remove "Question N:"
+             .replace(/^Questão\s*\d*:?\s*/i, '') // Remove "Questão N:"
+             .trim()
+    
     if (stem.length < 10) return null // Question too short
 
-    // Parse options
-    const options = { a: '', b: '', c: '', d: '', e: '' }
-    const optionKeys: (keyof typeof options)[] = ['a', 'b', 'c', 'd', 'e']
-    
-    optionMatches.forEach((match, index) => {
-      if (index < 5) {
-        // Clean the option text
-        const optionText = match.replace(/^[A-E][\)\.]?\s*/, '').trim()
-        options[optionKeys[index]] = optionText
-      }
-    })
+    // Build options object
+    const options = { 
+      a: optionsData.a || '', 
+      b: optionsData.b || '', 
+      c: optionsData.c || '', 
+      d: optionsData.d || '', 
+      e: optionsData.e || '' 
+    }
 
-    // Look for answer indicators
+    // Enhanced answer detection patterns
     const answerPatterns = [
       /(?:answer|resposta|gabarito)[\s:]*([A-E])/i,
-      /(?:correct|correta)[\s:]*([A-E])/i,
-      /([A-E])[\s\-]*(?:correct|correta)/i,
+      /(?:correct|correta|correto)[\s:]*(?:option|opção)?[\s:]*([A-E])/i,
+      /([A-E])[\s\-]*(?:correct|correta|correto)/i,
       /\*([A-E])\*/, // Marked with asterisks
-      /\b([A-E])\s*✓/  // Marked with checkmark
+      /\b([A-E])\s*✓/, // Marked with checkmark
+      /\b([A-E])\s*\(correct\)/i,
+      /\b([A-E])\s*\(correta\)/i,
+      /(?:key|chave)[\s:]*([A-E])/i,
+      /(?:solution|solução)[\s:]*([A-E])/i
     ]
 
     let correctOption = 'a' // Default
     for (const pattern of answerPatterns) {
       const match = cleanText.match(pattern)
-      if (match) {
+      if (match && match[1]) {
         correctOption = match[1].toLowerCase()
-        break
+        if (['a', 'b', 'c', 'd', 'e'].includes(correctOption)) {
+          break
+        }
       }
     }
 
-    // Look for explanation
+    // Enhanced explanation detection
     const explanationPatterns = [
-      /(?:explanation|explicação|comentário)[\s:]*(.+?)(?:\n|$)/i,
-      /(?:justificativa|resolução)[\s:]*(.+?)(?:\n|$)/i
+      /(?:explanation|explicação|comentário)[\s:]*(.+?)(?=\n[A-E][\)\.]|\n\d+\.|\n\n|$)/is,
+      /(?:justificativa|resolução|solution)[\s:]*(.+?)(?=\n[A-E][\)\.]|\n\d+\.|\n\n|$)/is,
+      /(?:rationale|reasoning)[\s:]*(.+?)(?=\n[A-E][\)\.]|\n\d+\.|\n\n|$)/is,
+      /(?:because|porque)[\s:]*(.+?)(?=\n[A-E][\)\.]|\n\d+\.|\n\n|$)/is
     ]
 
     let explanation = ''
     for (const pattern of explanationPatterns) {
       const match = cleanText.match(pattern)
-      if (match) {
+      if (match && match[1]) {
         explanation = match[1].trim()
-        break
+        // Clean up the explanation
+        explanation = explanation.replace(/^\W+/, '').replace(/\W+$/, '')
+        if (explanation.length > 10) {
+          break
+        }
       }
     }
 

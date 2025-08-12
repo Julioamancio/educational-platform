@@ -11,10 +11,11 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useKV } from '@github/spark/hooks'
 import { Topic, Question } from '@/types'
-import { Plus, PencilSimple, Trash, Question as QuestionIcon, Eye, EyeSlash, Upload, FileText, Brain, Target } from '@phosphor-icons/react'
+import { Plus, PencilSimple, Trash, Question as QuestionIcon, Eye, EyeSlash, Upload, FileText, Brain, Target, Pencil as Edit } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import MediaUpload from '@/components/MediaUpload'
 import WordImport from '@/components/admin/WordImport'
+import SampleDocuments from '@/components/admin/SampleDocuments'
 
 export default function QuestionsManagement() {
   const [topics] = useKV<Topic[]>('topics', [])
@@ -482,27 +483,7 @@ export default function QuestionsManagement() {
         </TabsContent>
 
         <TabsContent value="test" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Document Import Testing</CardTitle>
-              <CardDescription>
-                Test document import functionality with sample files
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-lg font-medium mb-2">Document Testing</h3>
-                <p className="text-muted-foreground mb-4">
-                  Upload sample documents to test the import functionality
-                </p>
-                <Button variant="outline">
-                  <Upload className="h-4 w-4 mr-2" />
-                  Upload Test Document
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <SampleDocuments />
         </TabsContent>
       </Tabs>
     </div>
