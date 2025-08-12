@@ -240,6 +240,4 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
       )}
     </>
   )
-}    </>
-  )
 }
