@@ -12,7 +12,7 @@ import { useKV } from '@github/spark/hooks'
 import { Topic, Content } from '@/types'
 import { Plus, Edit, Trash2, FileText, Eye, EyeOff, Clock } from '@phosphor-icons/react'
 import { toast } from 'sonner'
-import MediaUpload from './MediaUpload'
+import MediaUpload from '@/components/MediaUpload'
 
 export default function ContentsManagement() {
   const [topics] = useKV<Topic[]>('topics', [])
@@ -185,9 +185,12 @@ export default function ContentsManagement() {
               <div className="space-y-2">
                 <Label>Upload Media Files</Label>
                 <MediaUpload 
-                  onUpload={handleMediaUpload}
-                  accept="image/*,video/*"
-                  title="Upload Content Media"
+                  onFileSelect={(file) => {
+                    setContentMedia(prev => [...prev, file])
+                    toast.success(`${file.name} added to content media`)
+                  }}
+                  acceptedTypes={['image/*', 'video/*']}
+                  maxSizeMB={50}
                 />
               </div>
               

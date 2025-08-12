@@ -13,9 +13,8 @@ import { useKV } from '@github/spark/hooks'
 import { Topic, Question } from '@/types'
 import { Plus, Edit, Trash2, Question as QuestionIcon, Eye, EyeOff, Upload, FileText } from '@phosphor-icons/react'
 import { toast } from 'sonner'
-import MediaUpload from './MediaUpload'
-import WordImport from './WordImport'
-import DocumentTester from './DocumentTester'
+import MediaUpload from '@/components/MediaUpload'
+import WordImport from '@/components/WordImport'
 
 export default function QuestionsManagement() {
   const [topics] = useKV<Topic[]>('topics', [])
@@ -473,18 +472,38 @@ export default function QuestionsManagement() {
             </CardHeader>
             <CardContent>
               <MediaUpload 
-                onUpload={(files) => {
-                  toast.success(`${files.length} file(s) uploaded to media library`)
+                onFileSelect={(file) => {
+                  toast.success(`${file.name} uploaded to media library`)
                 }}
-                title="Add to Media Library"
-                multiple={true}
+                acceptedTypes={['image/*', 'video/*']}
+                maxSizeMB={50}
               />
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="test" className="space-y-6">
-          <DocumentTester />
+          <Card>
+            <CardHeader>
+              <CardTitle>Document Import Testing</CardTitle>
+              <CardDescription>
+                Test document import functionality with sample files
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8">
+                <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-medium mb-2">Document Testing</h3>
+                <p className="text-muted-foreground mb-4">
+                  Upload sample documents to test the import functionality
+                </p>
+                <Button variant="outline">
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload Test Document
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
