@@ -27,10 +27,10 @@ function AppContent() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground font-medium">Carregando...</p>
         </div>
       </div>
     )
@@ -68,11 +68,26 @@ function AppContent() {
           />
         ) : null
       case 'study':
-        return user.role === 'student' ? <div>Study Content (Coming Soon)</div> : null
+        return user.role === 'student' ? (
+          <div className="text-center py-12">
+            <h2 className="text-2xl font-bold text-muted-foreground mb-4">Conteúdo de Estudo</h2>
+            <p className="text-muted-foreground">Em breve...</p>
+          </div>
+        ) : null
       case 'review':
-        return user.role === 'student' ? <div>Review (Coming Soon)</div> : null
+        return user.role === 'student' ? (
+          <div className="text-center py-12">
+            <h2 className="text-2xl font-bold text-muted-foreground mb-4">Revisão</h2>
+            <p className="text-muted-foreground">Em breve...</p>
+          </div>
+        ) : null
       case 'progress':
-        return user.role === 'student' ? <div>Progress (Coming Soon)</div> : null
+        return user.role === 'student' ? (
+          <div className="text-center py-12">
+            <h2 className="text-2xl font-bold text-muted-foreground mb-4">Progresso</h2>
+            <p className="text-muted-foreground">Em breve...</p>
+          </div>
+        ) : null
       
       default:
         return <Dashboard />
@@ -82,9 +97,11 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-background">
       <Sidebar currentView={currentView} onViewChange={handleViewChange} />
-      <main className="lg:pl-64">
-        <div className="p-4 lg:p-8">
-          {renderMainContent()}
+      <main className="lg:pl-64 transition-all duration-300">
+        <div className="p-4 lg:p-8 pt-16 lg:pt-8">
+          <div className="max-w-7xl mx-auto">
+            {renderMainContent()}
+          </div>
         </div>
       </main>
     </div>
@@ -97,7 +114,17 @@ function App() {
       <ThemeProvider>
         <AuthProvider>
           <AppContent />
-          <Toaster />
+          <Toaster 
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: 'hsl(var(--card))',
+                color: 'hsl(var(--card-foreground))',
+                border: '1px solid hsl(var(--border))',
+              },
+            }}
+          />
         </AuthProvider>
       </ThemeProvider>
     </ErrorBoundary>
