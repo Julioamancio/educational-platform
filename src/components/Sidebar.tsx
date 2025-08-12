@@ -6,7 +6,7 @@ import {
   House, 
   BookOpen as Topics, 
   FileText,
-  Question, 
+  Question as QuestionIcon, 
   ChartLineUp, 
   GearSix, 
   Student,
@@ -35,7 +35,7 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
     { id: 'dashboard', label: 'Dashboard', icon: House },
     { id: 'topics', label: 'Topics', icon: Topics },
     { id: 'contents', label: 'Contents', icon: FileText },
-    { id: 'questions', label: 'Questions', icon: Question },
+    { id: 'questions', label: 'Questions', icon: QuestionIcon },
     { id: 'reports', label: 'Reports', icon: ChartLineUp },
     { id: 'settings', label: 'Settings', icon: GearSix },
   ]
