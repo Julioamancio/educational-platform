@@ -164,6 +164,33 @@ export default function PracticeView({ topicId, onBack }: PracticeViewProps) {
             <div dangerouslySetInnerHTML={{ __html: currentQuestion?.stemHtml || '' }} />
           </div>
 
+          {/* Display question media if available */}
+          {currentQuestion?.mediaUrls && currentQuestion.mediaUrls.length > 0 && (
+            <div className="space-y-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {currentQuestion.mediaUrls.map((url, index) => (
+                  <div key={index} className="relative">
+                    {url.includes('video') || url.includes('.mp4') || url.includes('.webm') ? (
+                      <video 
+                        src={url} 
+                        className="w-full rounded-lg border"
+                        controls
+                        style={{ maxHeight: '300px' }}
+                      />
+                    ) : (
+                      <img 
+                        src={url} 
+                        alt={`Question media ${index + 1}`}
+                        className="w-full rounded-lg border object-cover"
+                        style={{ maxHeight: '300px' }}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="space-y-3">
             {['A', 'B', 'C', 'D', 'E'].map((option) => {
               const optionText = currentQuestion?.[`option${option}` as keyof Question] as string

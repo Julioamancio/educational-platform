@@ -6,6 +6,7 @@ import LoginPage from '@/components/LoginPage'
 import Sidebar from '@/components/Sidebar'
 import Dashboard from '@/components/Dashboard'
 import TopicsManagement from '@/components/admin/TopicsManagement'
+import ContentsManagement from '@/components/admin/ContentsManagement'
 import QuestionsManagement from '@/components/admin/QuestionsManagement'
 import TopicsView from '@/components/student/TopicsView'
 import PracticeView from '@/components/student/PracticeView'
@@ -44,7 +45,7 @@ function AppContent() {
       case 'topics':
         return user.role === 'admin' ? <TopicsManagement /> : <TopicsView onViewChange={handleViewChange} />
       case 'contents':
-        return user.role === 'admin' ? <div>Contents Management (Coming Soon)</div> : null
+        return user.role === 'admin' ? <ContentsManagement /> : null
       case 'questions':
         return user.role === 'admin' ? <QuestionsManagement /> : null
       case 'reports':

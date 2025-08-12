@@ -14,6 +14,7 @@ export interface Content {
   title: string
   bodyHtml: string
   mediaUrl?: string
+  mediaUrls?: string[]
   estimatedTimeMin: number
   tags: string[]
   isPublished: boolean
@@ -36,6 +37,7 @@ export interface Question {
   tags: string[]
   isPublished: boolean
   createdAt: string
+  mediaUrls?: string[]
 }
 
 export interface Attempt {
