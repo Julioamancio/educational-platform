@@ -11,6 +11,24 @@ export const sampleUsers: User[] = [
     lastLogin: new Date().toISOString()
   },
   {
+    id: 'admin-2',
+    name: 'Professor Carlos',
+    email: 'carlos@eduplatform.com',
+    password: 'prof2024',
+    role: 'admin',
+    createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+    lastLogin: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'admin-3',
+    name: 'Dra. Helena Santos',
+    email: 'helena@eduplatform.com',
+    password: 'helena456',
+    role: 'admin',
+    createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+    lastLogin: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()
+  },
+  {
     id: 'student-1',
     name: 'Ana Silva',
     email: 'ana@example.com',

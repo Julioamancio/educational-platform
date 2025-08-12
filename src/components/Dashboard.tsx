@@ -4,7 +4,7 @@ import { Progress } from '@/components/ui/progress'
 import { useAuth } from '@/contexts/AuthContext'
 import { useKV } from '@github/spark/hooks'
 import { Topic, Content, Question, Attempt, StudyLog } from '@/types'
-import { Book, Question as QuestionIcon, TrendUp, Users, CheckCircle, GraduationCap, ClockCounterClockwise, Target, Plus, Database, Lightning, Calendar, Trophy, Activity, Sparkle, FileText } from '@phosphor-icons/react'
+import { Book, Question as QuestionIcon, TrendUp, Users, CheckCircle, GraduationCap, ClockCounterClockwise, Target, Plus, Database, Lightning, Calendar, Trophy, Activity, Sparkle, Note } from '@phosphor-icons/react'
 import { initializeSampleData } from '@/lib/sampleData'
 import { toast } from 'sonner'
 
@@ -205,7 +205,7 @@ export default function Dashboard() {
                       </div>
                       <div className="flex gap-4 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
-                          <FileText size={14} />
+                          <Note size={14} />
                           {topicContents.length} conteúdos
                         </span>
                         <span className="flex items-center gap-1">

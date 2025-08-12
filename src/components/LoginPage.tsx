@@ -134,28 +134,26 @@ export default function LoginPage() {
               <div className="mt-8 p-6 bg-gradient-to-r from-muted/50 to-muted/30 rounded-xl border border-border/50">
                 <p className="text-sm font-medium text-foreground mb-4 flex items-center">
                   <GraduationCap size={16} className="mr-2" />
-                  Contas de demonstração:
+                  Precisa de acesso?
                 </p>
                 <div className="space-y-3 text-sm">
                   <div className="flex items-center justify-between p-3 bg-card/50 rounded-lg border border-border/30">
                     <div className="flex items-center">
                       <Lightning size={16} className="mr-2 text-primary" weight="fill" />
                       <div>
-                        <p className="font-medium">Administrador</p>
-                        <p className="text-xs text-muted-foreground">admin@demo.com</p>
+                        <p className="font-medium">Administradores</p>
+                        <p className="text-xs text-muted-foreground">Entre com suas credenciais fornecidas</p>
                       </div>
                     </div>
-                    <span className="text-xs text-muted-foreground">demo123</span>
                   </div>
                   <div className="flex items-center justify-between p-3 bg-card/50 rounded-lg border border-border/30">
                     <div className="flex items-center">
                       <Atom size={16} className="mr-2 text-secondary" weight="fill" />
                       <div>
-                        <p className="font-medium">Estudante</p>
-                        <p className="text-xs text-muted-foreground">student@demo.com</p>
+                        <p className="font-medium">Estudantes</p>
+                        <p className="text-xs text-muted-foreground">Registre-se para começar</p>
                       </div>
                     </div>
-                    <span className="text-xs text-muted-foreground">demo123</span>
                   </div>
                 </div>
               </div>

@@ -37,7 +37,7 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
     { id: 'topics', label: 'Tópicos', icon: Books },
     { id: 'contents', label: 'Conteúdos', icon: FileText },
     { id: 'questions', label: 'Questões', icon: Question },
-    { id: 'students', label: 'Alunos', icon: Users },
+    { id: 'users', label: 'Usuários', icon: Users },
     { id: 'reports', label: 'Relatórios', icon: ChartBar },
     { id: 'settings', label: 'Configurações', icon: Gear },
   ]

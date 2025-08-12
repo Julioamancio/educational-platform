@@ -54,7 +54,7 @@ function AppContent() {
         return user.role === 'admin' ? <QuestionsManagement /> : null
       case 'reports':
         return user.role === 'admin' ? <ReportsManagement /> : null
-      case 'students':
+      case 'users':
         return user.role === 'admin' ? <StudentsManagement /> : null
       case 'settings':
         return user.role === 'admin' ? <SettingsManagement /> : null
