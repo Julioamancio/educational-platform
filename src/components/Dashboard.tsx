@@ -40,7 +40,7 @@ export default function Dashboard() {
       <div className="space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold gradient-text mb-2">Dashboard Administrativo</h1>
+            <h1 className="text-4xl font-bold text-foreground mb-2">Dashboard Administrativo</h1>
             <p className="text-muted-foreground text-lg">Visão geral da sua plataforma de ensino</p>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
@@ -259,7 +259,7 @@ export default function Dashboard() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold gradient-text mb-2">Bem-vindo de volta, {user?.name}!</h1>
+          <h1 className="text-4xl font-bold text-foreground mb-2">Bem-vindo de volta, {user?.name}!</h1>
           <p className="text-muted-foreground text-lg">Continue sua jornada de aprendizado</p>
         </div>
         <div className="flex items-center gap-2 text-muted-foreground">

@@ -62,7 +62,7 @@ export default function LoginPage() {
               <GraduationCap size={28} className="text-primary-foreground" weight="bold" />
             </div>
             <div>
-              <CardTitle className="text-3xl font-bold gradient-text">
+              <CardTitle className="text-3xl font-bold text-foreground">
                 EduPlatform
               </CardTitle>
               <p className="text-xs text-muted-foreground mt-1">

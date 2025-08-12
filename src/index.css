@@ -63,10 +63,7 @@
     @apply focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background;
   }
   
-  /* Gradient text effects */
-  .gradient-text {
-    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
-  }
+
   
   /* Enhanced button styles */
   .btn-modern {
