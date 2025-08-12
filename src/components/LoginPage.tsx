@@ -94,6 +94,7 @@ export default function LoginPage() {
                     id="email"
                     name="email"
                     type="email"
+                    defaultValue="admin@demo.com"
                     placeholder="Digite seu e-mail"
                     className="focus-ring"
                     required
@@ -106,6 +107,7 @@ export default function LoginPage() {
                       id="password"
                       name="password"
                       type={showPassword ? "text" : "password"}
+                      defaultValue="demo123"
                       placeholder="Digite sua senha"
                       className="focus-ring pr-10"
                       required
@@ -134,25 +136,42 @@ export default function LoginPage() {
               <div className="mt-8 p-6 bg-gradient-to-r from-muted/50 to-muted/30 rounded-xl border border-border/50">
                 <p className="text-sm font-medium text-foreground mb-4 flex items-center">
                   <GraduationCap size={16} className="mr-2" />
-                  Precisa de acesso?
+                  Credenciais de Demonstração
                 </p>
                 <div className="space-y-3 text-sm">
-                  <div className="flex items-center justify-between p-3 bg-card/50 rounded-lg border border-border/30">
-                    <div className="flex items-center">
+                  <div className="p-4 bg-card/70 rounded-lg border border-border/30">
+                    <div className="flex items-center mb-3">
                       <Lightning size={16} className="mr-2 text-primary" weight="fill" />
-                      <div>
-                        <p className="font-medium">Administradores</p>
-                        <p className="text-xs text-muted-foreground">Entre com suas credenciais fornecidas</p>
+                      <p className="font-medium text-primary">Administrador</p>
+                    </div>
+                    <div className="space-y-2 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Email:</span>
+                        <span className="font-mono text-foreground">admin@demo.com</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Senha:</span>
+                        <span className="font-mono text-foreground">demo123</span>
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-card/50 rounded-lg border border-border/30">
-                    <div className="flex items-center">
+                  <div className="p-4 bg-card/70 rounded-lg border border-border/30">
+                    <div className="flex items-center mb-3">
                       <Atom size={16} className="mr-2 text-secondary" weight="fill" />
-                      <div>
-                        <p className="font-medium">Estudantes</p>
-                        <p className="text-xs text-muted-foreground">Registre-se para começar</p>
+                      <p className="font-medium text-secondary">Estudante (exemplo)</p>
+                    </div>
+                    <div className="space-y-2 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Email:</span>
+                        <span className="font-mono text-foreground">student@demo.com</span>
                       </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Senha:</span>
+                        <span className="font-mono text-foreground">demo123</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Ou registre-se para criar uma nova conta de estudante
+                      </p>
                     </div>
                   </div>
                 </div>
