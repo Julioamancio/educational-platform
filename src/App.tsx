@@ -11,6 +11,7 @@ import ContentsManagement from '@/components/admin/ContentsManagement'
 import QuestionsManagement from '@/components/admin/QuestionsManagement'
 import ReportsManagement from '@/components/admin/ReportsManagement'
 import SettingsManagement from '@/components/admin/SettingsManagement'
+import StudentsManagement from '@/components/admin/StudentsManagement'
 import TopicsView from '@/components/student/TopicsView'
 import PracticeView from '@/components/student/PracticeView'
 
@@ -53,6 +54,8 @@ function AppContent() {
         return user.role === 'admin' ? <QuestionsManagement /> : null
       case 'reports':
         return user.role === 'admin' ? <ReportsManagement /> : null
+      case 'students':
+        return user.role === 'admin' ? <StudentsManagement /> : null
       case 'settings':
         return user.role === 'admin' ? <SettingsManagement /> : null
       

@@ -1,15 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { useKV } from '@github/spark/hooks'
-import { Topic, Content, Question } from '@/types'
+import { User, Topic, Content, Question } from '@/types'
 import { seedUsers, seedTopics, seedContents, seedQuestions } from '@/utils/seedData'
-
-export interface User {
-  id: string
-  name: string
-  email: string
-  role: 'admin' | 'student'
-  createdAt: string
-}
 
 interface AuthContextType {
   user: User | null

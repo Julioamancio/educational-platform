@@ -10,7 +10,7 @@ import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import { useKV } from '@github/spark/hooks'
 import { Topic, Content } from '@/types'
-import { Plus, PencilSimple, Trash, FileText, Eye, EyeSlash, Clock, Image, VideoCamera, Upload, ArticleNyTimes, Pencil, Trash2, EyeOff } from '@phosphor-icons/react'
+import { Plus, PencilSimple, Trash, FileText, Eye, EyeSlash, Clock, Image, VideoCamera, Upload, ArticleNyTimes } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import MediaUpload from '@/components/MediaUpload'
 
@@ -253,7 +253,7 @@ export default function ContentsManagement() {
                       </Badge>
                     ) : (
                       <Badge variant="secondary">
-                        <EyeOff className="w-3 h-3 mr-1" />
+                        <EyeSlash className="w-3 h-3 mr-1" />
                         Draft
                       </Badge>
                     )}
@@ -268,14 +268,14 @@ export default function ContentsManagement() {
                     variant="ghost"
                     onClick={() => handleEdit(content)}
                   >
-                    <Pencil className="w-4 h-4" />
+                    <PencilSimple className="w-4 h-4" />
                   </Button>
                   <Button
                     size="sm"
                     variant="ghost"
                     onClick={() => handleDelete(content.id)}
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash className="w-4 h-4" />
                   </Button>
                 </div>
               </div>

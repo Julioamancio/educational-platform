@@ -1,3 +1,12 @@
+export interface User {
+  id: string
+  name: string
+  email: string
+  role: 'admin' | 'student'
+  createdAt: string
+  lastLogin?: string
+}
+
 export interface Topic {
   id: string
   name: string

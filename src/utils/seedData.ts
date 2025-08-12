@@ -1,5 +1,4 @@
-import { User } from '@/contexts/AuthContext'
-import { Topic, Content, Question } from '@/types'
+import { User, Topic, Content, Question } from '@/types'
 
 export const seedUsers: User[] = [
   {
@@ -7,21 +6,47 @@ export const seedUsers: User[] = [
     name: 'Admin User',
     email: 'admin@demo.com',
     role: 'admin',
-    createdAt: new Date().toISOString()
+    createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+    lastLogin: new Date().toISOString()
   },
   {
     id: '2',
     name: 'Ana Silva',
     email: 'student@demo.com',
     role: 'student',
-    createdAt: new Date().toISOString()
+    createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+    lastLogin: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
   },
   {
     id: '3',
     name: 'João Santos',
     email: 'joao@demo.com',
     role: 'student',
-    createdAt: new Date().toISOString()
+    createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+    lastLogin: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: '4',
+    name: 'Maria Oliveira',
+    email: 'maria@demo.com',
+    role: 'student',
+    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    lastLogin: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: '5',
+    name: 'Pedro Costa',
+    email: 'pedro@demo.com',
+    role: 'student',
+    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    lastLogin: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: '6',
+    name: 'Sofia Ferreira',
+    email: 'sofia@demo.com',
+    role: 'student',
+    createdAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString()
   }
 ]
 

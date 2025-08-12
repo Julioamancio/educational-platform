@@ -36,6 +36,7 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
     { id: 'topics', label: 'Topics', icon: Topics },
     { id: 'contents', label: 'Contents', icon: FileText },
     { id: 'questions', label: 'Questions', icon: QuestionIcon },
+    { id: 'students', label: 'Students', icon: Users },
     { id: 'reports', label: 'Reports', icon: ChartLineUp },
     { id: 'settings', label: 'Settings', icon: GearSix },
   ]
