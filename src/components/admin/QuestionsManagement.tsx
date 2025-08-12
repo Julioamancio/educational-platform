@@ -24,10 +24,6 @@ export default function QuestionsManagement() {
   const [activeTab, setActiveTab] = useState('manage')
   const [questionMedia, setQuestionMedia] = useState<any[]>([])
 
-  const handleMediaUpload = (files: any[]) => {
-    setQuestionMedia(prev => [...prev, ...files])
-  }
-
   const handleWordImport = (importedQuestions: any[], topicId: string) => {
     const formattedQuestions: Question[] = importedQuestions.map(q => ({
       id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
@@ -236,9 +232,11 @@ export default function QuestionsManagement() {
                   <div className="space-y-2">
                     <Label>Media Files (Images/Videos)</Label>
                     <MediaUpload 
-                      onUpload={handleMediaUpload}
-                      accept="image/*,video/*"
-                      title="Upload Question Media"
+                      onFileSelect={(file) => {
+                        setQuestionMedia(prev => [...prev, file])
+                      }}
+                      acceptedTypes={['image/*', 'video/*']}
+                      maxSizeMB={50}
                     />
                   </div>
                   
@@ -341,7 +339,7 @@ export default function QuestionsManagement() {
                           </Badge>
                         ) : (
                           <Badge variant="secondary">
-                            <EyeOff className="w-3 h-3 mr-1" />
+                            <EyeSlash className="w-3 h-3 mr-1" />
                             Draft
                           </Badge>
                         )}
@@ -356,14 +354,14 @@ export default function QuestionsManagement() {
                         variant="ghost"
                         onClick={() => handleEdit(question)}
                       >
-                        <Edit className="w-4 h-4" />
+                        <PencilSimple className="w-4 h-4" />
                       </Button>
                       <Button
                         size="sm"
                         variant="ghost"
                         onClick={() => handleDelete(question.id)}
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
