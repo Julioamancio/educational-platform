@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Toaster } from '@/components/ui/sonner'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
+import ErrorBoundary from '@/components/ErrorBoundary'
 import LoginPage from '@/components/LoginPage'
 import Sidebar from '@/components/Sidebar'
 import Dashboard from '@/components/Dashboard'
@@ -85,10 +86,12 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-      <Toaster />
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <AppContent />
+        <Toaster />
+      </AuthProvider>
+    </ErrorBoundary>
   )
 }
 
