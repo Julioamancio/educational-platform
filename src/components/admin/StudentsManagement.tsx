@@ -12,7 +12,6 @@ import { User } from '@/types'
 import { Plus, Trash, Users, UserCircle, Check, X, MagnifyingGlass, Funnel, Download, Warning, Shield, Eye, EyeSlash, Copy } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
-export default function StudentsManagement() {
   const [users, setUsers] = useKV<User[]>('users', [])
   const [selectedStudents, setSelectedStudents] = useState<Set<string>>(new Set())
   const [searchTerm, setSearchTerm] = useState('')
