@@ -15,6 +15,7 @@ import { Plus, Edit, Trash2, Question as QuestionIcon, Eye, EyeOff, Upload, File
 import { toast } from 'sonner'
 import MediaUpload from './MediaUpload'
 import WordImport from './WordImport'
+import DocumentTester from './DocumentTester'
 
 export default function QuestionsManagement() {
   const [topics] = useKV<Topic[]>('topics', [])
@@ -134,7 +135,7 @@ export default function QuestionsManagement() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="manage" className="flex items-center gap-2">
             <QuestionIcon size={16} />
             Manage Questions
@@ -146,6 +147,10 @@ export default function QuestionsManagement() {
           <TabsTrigger value="media" className="flex items-center gap-2">
             <Upload size={16} />
             Media Library
+          </TabsTrigger>
+          <TabsTrigger value="test" className="flex items-center gap-2">
+            <QuestionIcon size={16} />
+            Test Parser
           </TabsTrigger>
         </TabsList>
 
@@ -476,6 +481,10 @@ export default function QuestionsManagement() {
               />
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="test" className="space-y-6">
+          <DocumentTester />
         </TabsContent>
       </Tabs>
     </div>

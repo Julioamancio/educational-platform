@@ -43,7 +43,9 @@ export class WordDocumentParser {
       try {
         const mammothModule = await import('mammoth')
         this.mammoth = mammothModule.default || mammothModule
+        console.log('Mammoth library loaded successfully')
       } catch (error) {
+        console.error('Failed to load mammoth library:', error)
         throw new Error('Failed to load document parser. Please try again.')
       }
     }
@@ -169,9 +171,31 @@ export class WordDocumentParser {
 
   private parseNumberedQuestions(text: string, images: string[], result: ParsingResult): ParsedQuestion[] {
     const questions: ParsedQuestion[] = []
-    const questionBlocks = text.split(/(?=\d+\.)/m).filter(block => block.trim())
-
-    questionBlocks.forEach((block, index) => {
+    
+    // Enhanced regex patterns for question detection
+    const questionPatterns = [
+      /(?=\d+\.)/m,           // Standard: 1. 2. 3.
+      /(?=\d+\))/m,           // Alternative: 1) 2) 3)
+      /(?=Question\s*\d+)/gim, // Question 1, Question 2
+      /(?=Q\.?\d+)/gim,       // Q1, Q.1, Q2
+      /(?=\d+\s*[-–—])/m      // 1 - question, 2 – question
+    ]
+    
+    let bestSplit: string[] = []
+    let bestScore = 0
+    
+    // Try different splitting patterns and choose the best one
+    for (const pattern of questionPatterns) {
+      const split = text.split(pattern).filter(block => block.trim())
+      const score = this.scoreQuestionSplit(split)
+      
+      if (score > bestScore) {
+        bestScore = score
+        bestSplit = split
+      }
+    }
+    
+    bestSplit.forEach((block, index) => {
       try {
         const question = this.parseQuestionBlock(block, index, images, result)
         if (question) {
@@ -183,6 +207,34 @@ export class WordDocumentParser {
     })
 
     return questions
+  }
+  
+  private scoreQuestionSplit(blocks: string[]): number {
+    let score = 0
+    
+    for (const block of blocks) {
+      // Look for question indicators
+      if (block.match(/\?/) || block.match(/choose|select|which|what|how|when|where|why/i)) {
+        score += 10
+      }
+      
+      // Look for options
+      const optionMatches = block.match(/[A-E]\)/g) || []
+      score += optionMatches.length * 2
+      
+      // Look for answer indicators
+      if (block.match(/answer|correct|solution/i)) {
+        score += 5
+      }
+      
+      // Penalize very short or very long blocks
+      const wordCount = block.split(/\s+/).length
+      if (wordCount < 5 || wordCount > 500) {
+        score -= 5
+      }
+    }
+    
+    return score
   }
 
   private parseQuestionAnswerFormat(text: string, images: string[], result: ParsingResult): ParsedQuestion[] {
@@ -280,37 +332,62 @@ export class WordDocumentParser {
     for (let i = questionEndIndex; i < lines.length; i++) {
       const line = lines[i].trim()
       
-      // Parse options
-      const optionMatch = line.match(/^([A-E])\)\s*(.+)/)
-      if (optionMatch) {
-        const letter = optionMatch[1] as keyof typeof options
-        options[letter] = optionMatch[2].trim()
-        continue
+      // Enhanced option parsing for different formats
+      const optionPatterns = [
+        /^([A-E])\)\s*(.+)/,           // A) option
+        /^([A-E])\.\s*(.+)/,           // A. option  
+        /^([A-E])\s*[-–—]\s*(.+)/,     // A - option
+        /^([A-E]):\s*(.+)/,            // A: option
+        /^\(([A-E])\)\s*(.+)/,         // (A) option
+        /^Option\s*([A-E]):\s*(.+)/i,  // Option A: text
+        /^([A-E])\s+(.+)/              // A text (with space)
+      ]
+      
+      let optionMatched = false
+      for (const pattern of optionPatterns) {
+        const optionMatch = line.match(pattern)
+        if (optionMatch) {
+          const letter = optionMatch[1] as keyof typeof options
+          if (letter in options) {
+            options[letter] = optionMatch[2].trim()
+            optionMatched = true
+            break
+          }
+        }
       }
+      
+      if (optionMatched) continue
 
-      // Parse metadata
-      const answerMatch = line.match(/^(?:Correct\s*)?Answer:\s*([A-E])/i)
-      if (answerMatch) {
-        correctAnswer = answerMatch[1].toUpperCase()
-        continue
-      }
-
-      const explanationMatch = line.match(/^Explanation:\s*(.+)/i)
-      if (explanationMatch) {
-        explanation = explanationMatch[1]
-        continue
-      }
-
-      const difficultyMatch = line.match(/^Difficulty:\s*(A[12]|B[12]|C[12])/i)
-      if (difficultyMatch) {
-        difficulty = difficultyMatch[1].toUpperCase()
-        continue
-      }
-
-      const tagsMatch = line.match(/^Tags:\s*(.+)/i)
-      if (tagsMatch) {
-        tags = tagsMatch[1].split(',').map(tag => tag.trim()).filter(Boolean)
-        continue
+      // Enhanced metadata parsing
+      const metadataPatterns = [
+        { pattern: /^(?:correct\s*)?(?:answer|solution|right):\s*([A-E])/i, field: 'answer' },
+        { pattern: /^explanation:\s*(.+)/i, field: 'explanation' },
+        { pattern: /^(?:note|comment):\s*(.+)/i, field: 'explanation' },
+        { pattern: /^difficulty:\s*(A[12]|B[12]|C[12])/i, field: 'difficulty' },
+        { pattern: /^level:\s*(A[12]|B[12]|C[12])/i, field: 'difficulty' },
+        { pattern: /^tags:\s*(.+)/i, field: 'tags' },
+        { pattern: /^(?:categories|category):\s*(.+)/i, field: 'tags' }
+      ]
+      
+      for (const { pattern, field } of metadataPatterns) {
+        const match = line.match(pattern)
+        if (match) {
+          switch (field) {
+            case 'answer':
+              correctAnswer = match[1].toUpperCase()
+              break
+            case 'explanation':
+              explanation = match[1]
+              break
+            case 'difficulty':
+              difficulty = match[1].toUpperCase()
+              break
+            case 'tags':
+              tags = match[1].split(/[,;]/).map(tag => tag.trim()).filter(Boolean)
+              break
+          }
+          break
+        }
       }
     }
 
@@ -387,14 +464,49 @@ export class WordDocumentParser {
   private detectCorrectAnswer(text: string, options: Record<string, string>): string {
     const lowerText = text.toLowerCase()
     
-    // Look for explicit answer indicators
+    // Enhanced answer detection patterns
+    const answerPatterns = [
+      /(?:correct\s*)?answer:\s*([A-E])/i,
+      /(?:right\s*)?answer:\s*([A-E])/i,
+      /solution:\s*([A-E])/i,
+      /correct:\s*([A-E])/i,
+      /answer\s*key:\s*([A-E])/i,
+      /answer\s*is:\s*([A-E])/i,
+      /\b([A-E])\s*is\s*correct/i,
+      /\b([A-E])\s*✓/,
+      /\b([A-E])\s*←/,
+      /\b([A-E])\s*\(correct/i,
+      /option\s*([A-E])\s*is\s*right/i
+    ]
+    
+    // Try each pattern
+    for (const pattern of answerPatterns) {
+      const match = text.match(pattern)
+      if (match && match[1]) {
+        return match[1].toUpperCase()
+      }
+    }
+    
+    // Look for visual indicators in options
     for (const [letter, option] of Object.entries(options)) {
       if (option && (
-        lowerText.includes(`answer is ${letter.toLowerCase()}`) ||
-        lowerText.includes(`answer: ${letter.toLowerCase()}`) ||
-        lowerText.includes(`correct: ${letter.toLowerCase()}`) ||
-        option.toLowerCase().includes('correct') ||
-        option.toLowerCase().includes('right answer')
+        option.includes('✓') ||
+        option.includes('←') ||
+        option.includes('(correct') ||
+        option.includes('(right') ||
+        option.toLowerCase().includes('this is') ||
+        option.toLowerCase().includes('definitely') ||
+        option.toLowerCase().includes('obviously')
+      )) {
+        return letter
+      }
+    }
+    
+    // Look for emphasis patterns in the surrounding text
+    for (const [letter, option] of Object.entries(options)) {
+      if (option && (
+        lowerText.includes(`${letter.toLowerCase()}) ${option.toLowerCase()}`) &&
+        (lowerText.includes('correct') || lowerText.includes('right'))
       )) {
         return letter
       }
