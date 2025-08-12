@@ -24,9 +24,13 @@ import {
   BookOpen,
   FileQuestion,
   Eye,
-  EyeSlash
+  EyeSlash,
+  Moon,
+  Sun,
+  Monitor
 } from '@phosphor-icons/react'
 import { useKV } from '@github/spark/hooks'
+import { useTheme } from '@/contexts/ThemeContext'
 import { toast } from 'sonner'
 
 interface PlatformSettings {
@@ -45,11 +49,12 @@ interface PlatformSettings {
 }
 
 export default function SettingsManagement() {
-  const [users] = useKV('users', [])
+  const { theme, setTheme } = useTheme()
+  const [users, setUsers] = useKV('users', [])
   const [topics] = useKV('topics', [])
   const [questions] = useKV('questions', [])
-  const [attempts] = useKV('attempts', [])
-  const [studyLogs] = useKV('studyLogs', [])
+  const [attempts, setAttempts] = useKV('attempts', [])
+  const [studyLogs, setStudyLogs] = useKV('studyLogs', [])
   const [settings, setSettings] = useKV('platformSettings', {
     siteName: 'EduPlatform',
     siteDescription: 'A comprehensive learning management system',
@@ -71,7 +76,11 @@ export default function SettingsManagement() {
   const handleSaveSettings = async () => {
     setIsLoading(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
+      // Save theme to platform settings and apply it
+      const updatedSettings = { ...settings, theme }
+      setSettings(updatedSettings)
+      
+      await new Promise(resolve => setTimeout(resolve, 500)) // Simulate save
       toast.success('Settings saved successfully')
     } catch (error) {
       toast.error('Failed to save settings')
@@ -106,33 +115,40 @@ export default function SettingsManagement() {
 
   const clearAllData = async () => {
     try {
-      await Promise.all([
-        setSettings({}),
-        // Keep admin users, clear only student data for safety
-      ])
-      toast.success('Selected data cleared successfully')
+      // Clear student data but keep admin users and settings
+      setAttempts([])
+      setStudyLogs([])
+      // Remove student users only, keep admins
+      setUsers(users.filter(user => user.role === 'admin'))
+      
+      toast.success('Student data cleared successfully')
     } catch (error) {
       toast.error('Failed to clear data')
     }
   }
 
-  const resetToDefaults = () => {
-    const defaultSettings: PlatformSettings = {
-      siteName: 'EduPlatform',
-      siteDescription: 'A comprehensive learning management system',
-      allowRegistration: true,
-      requireEmailVerification: false,
-      maxAttemptsPerQuestion: 3,
-      timeoutMinutes: 30,
-      showCorrectAnswer: true,
-      showExplanation: true,
-      allowReview: true,
-      defaultDifficulty: 'B1',
-      emailNotifications: true,
-      theme: 'light'
+  const resetToDefaults = async () => {
+    try {
+      const defaultSettings: PlatformSettings = {
+        siteName: 'EduPlatform',
+        siteDescription: 'A comprehensive learning management system',
+        allowRegistration: true,
+        requireEmailVerification: false,
+        maxAttemptsPerQuestion: 3,
+        timeoutMinutes: 30,
+        showCorrectAnswer: true,
+        showExplanation: true,
+        allowReview: true,
+        defaultDifficulty: 'B1',
+        emailNotifications: true,
+        theme: 'light'
+      }
+      setSettings(defaultSettings)
+      setTheme('light')
+      toast.success('Settings reset to defaults')
+    } catch (error) {
+      toast.error('Failed to reset settings')
     }
-    setSettings(defaultSettings)
-    toast.success('Settings reset to defaults')
   }
 
   // Statistics
@@ -195,18 +211,39 @@ export default function SettingsManagement() {
                 <div className="space-y-2">
                   <Label htmlFor="theme">Theme</Label>
                   <Select 
-                    value={settings.theme} 
-                    onValueChange={(value) => setSettings(prev => ({ ...prev, theme: value }))}
+                    value={theme} 
+                    onValueChange={(value: 'light' | 'dark' | 'auto') => {
+                      setTheme(value)
+                      toast.success(`Theme changed to ${value}`)
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="light">Light</SelectItem>
-                      <SelectItem value="dark">Dark</SelectItem>
-                      <SelectItem value="auto">Auto</SelectItem>
+                      <SelectItem value="light">
+                        <div className="flex items-center gap-2">
+                          <Sun className="h-4 w-4" />
+                          Light
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="dark">
+                        <div className="flex items-center gap-2">
+                          <Moon className="h-4 w-4" />
+                          Dark
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="auto">
+                        <div className="flex items-center gap-2">
+                          <Monitor className="h-4 w-4" />
+                          Auto
+                        </div>
+                      </SelectItem>
                     </SelectContent>
                   </Select>
+                  <p className="text-sm text-muted-foreground">
+                    Current theme: {theme === 'auto' ? 'Auto (follows system)' : theme}
+                  </p>
                 </div>
               </div>
               <div className="space-y-2">

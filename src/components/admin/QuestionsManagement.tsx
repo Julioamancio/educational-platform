@@ -14,7 +14,7 @@ import { Topic, Question } from '@/types'
 import { Plus, Edit, Trash2, Question as QuestionIcon, Eye, EyeOff, Upload, FileText } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import MediaUpload from '@/components/MediaUpload'
-import WordImport from '@/components/WordImport'
+import WordImport from '@/components/admin/WordImport'
 
 export default function QuestionsManagement() {
   const [topics] = useKV<Topic[]>('topics', [])
@@ -28,21 +28,21 @@ export default function QuestionsManagement() {
     setQuestionMedia(prev => [...prev, ...files])
   }
 
-  const handleWordImport = (importedQuestions: any[]) => {
+  const handleWordImport = (importedQuestions: any[], topicId: string) => {
     const formattedQuestions: Question[] = importedQuestions.map(q => ({
       id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-      topicId: q.topicId,
+      topicId: topicId,
       title: q.title,
       stemHtml: q.stem,
-      optionA: q.options.A,
-      optionB: q.options.B,
-      optionC: q.options.C,
-      optionD: q.options.D,
-      optionE: q.options.E,
-      correctOption: q.correctAnswer as 'A' | 'B' | 'C' | 'D' | 'E',
+      optionA: q.options.a,
+      optionB: q.options.b,
+      optionC: q.options.c,
+      optionD: q.options.d,
+      optionE: q.options.e,
+      correctOption: q.correctOption.toUpperCase() as 'A' | 'B' | 'C' | 'D' | 'E',
       commentHtml: q.explanation || '',
       difficulty: q.difficulty as Question['difficulty'],
-      tags: q.tags,
+      tags: [],
       isPublished: true,
       createdAt: new Date().toISOString(),
       mediaUrls: q.images || []
@@ -50,6 +50,7 @@ export default function QuestionsManagement() {
 
     setQuestions(currentQuestions => [...currentQuestions, ...formattedQuestions])
     setActiveTab('manage')
+    toast.success(`Imported ${formattedQuestions.length} questions successfully`)
   }
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {

@@ -1,157 +1,313 @@
-import { useState, useRef } from 'react'
+import { useState, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
+import { Progress } from '@/components/ui/progress'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Upload, FileText, Eye, CheckCircle, XCircle, Warning, Info } from '@phosphor-icons/react'
-import { toast } from 'sonner'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Upload, FileText, Image, CheckCircle, AlertCircle, Plus } from '@phosphor-icons/react'
 import { useKV } from '@github/spark/hooks'
-import { wordParser, type ParsedQuestion, type ParsingResult } from '@/utils/wordParser'
+import { toast } from 'sonner'
+import mammoth from 'mammoth'
+
+interface ParsedQuestion {
+  title: string
+  stem: string
+  options: {
+    a: string
+    b: string
+    c: string
+    d: string
+    e: string
+  }
+  correctOption: string
+  explanation: string
+  images: string[]
+  difficulty: string
+}
 
 interface WordImportProps {
-  onQuestionsImported: (questions: ParsedQuestion[]) => void
+  onQuestionsImported: (questions: ParsedQuestion[], topicId: string) => void
 }
 
 export default function WordImport({ onQuestionsImported }: WordImportProps) {
-  const [topics] = useKV<any[]>('topics', [])
-  const [importing, setImporting] = useState(false)
-  const [parsingResult, setParsingResult] = useState<ParsingResult | null>(null)
+  const [topics] = useKV('topics', [])
+  const [isOpen, setIsOpen] = useState(false)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [selectedTopic, setSelectedTopic] = useState('')
-  const [previewMode, setPreviewMode] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [parsedQuestions, setParsedQuestions] = useState<ParsedQuestion[]>([])
+  const [processingStatus, setProcessingStatus] = useState('')
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+  const processWordDocument = useCallback(async (file: File): Promise<ParsedQuestion[]> => {
+    setProcessingStatus('Reading document...')
+    setProgress(10)
 
-    if (!file.name.match(/\.(doc|docx|txt)$/i)) {
-      toast.error('Please select a Word document (.doc, .docx) or text file')
+    try {
+      const arrayBuffer = await file.arrayBuffer()
+      
+      setProcessingStatus('Extracting content...')
+      setProgress(30)
+
+      // Extract text and images from Word document
+      const result = await mammoth.convertToHtml({ arrayBuffer })
+      const html = result.value
+      const messages = result.messages
+
+      setProcessingStatus('Processing content...')
+      setProgress(50)
+
+      // Parse the HTML content to extract questions
+      const parser = new DOMParser()
+      const doc = parser.parseFromString(html, 'text/html')
+      
+      // Extract images
+      const images = Array.from(doc.querySelectorAll('img')).map(img => img.src)
+      
+      setProcessingStatus('Analyzing question patterns...')
+      setProgress(70)
+
+      // Get text content and split into potential questions
+      const textContent = doc.body.textContent || ''
+      const questions = parseQuestionsFromText(textContent, images)
+
+      setProcessingStatus('Finalizing...')
+      setProgress(90)
+
+      return questions
+    } catch (error) {
+      console.error('Error processing Word document:', error)
+      throw new Error('Failed to process Word document')
+    }
+  }, [])
+
+  const parseQuestionsFromText = (text: string, images: string[]): ParsedQuestion[] => {
+    const questions: ParsedQuestion[] = []
+    
+    // Split text by common question separators
+    const sections = text.split(/(?:\n\s*\n|\d+\.\s|\bQuestion\s*\d+|\bQuestão\s*\d+)/i)
+      .filter(section => section.trim().length > 50) // Filter out very short sections
+
+    let imageIndex = 0
+
+    sections.forEach((section, index) => {
+      try {
+        const questionData = parseIndividualQuestion(section.trim(), images.slice(imageIndex, imageIndex + 2))
+        if (questionData) {
+          questions.push({
+            ...questionData,
+            title: `Question ${questions.length + 1}`,
+            difficulty: 'B1' // Default difficulty
+          })
+          
+          // Assume max 2 images per question
+          if (questionData.images.length > 0) {
+            imageIndex += questionData.images.length
+          }
+        }
+      } catch (error) {
+        console.warn(`Failed to parse section ${index}:`, error)
+      }
+    })
+
+    return questions
+  }
+
+  const parseIndividualQuestion = (section: string, availableImages: string[]): ParsedQuestion | null => {
+    // Clean and normalize the text
+    const cleanText = section.replace(/\s+/g, ' ').trim()
+    
+    // Look for option patterns (A), (B), etc. or A), B), etc.
+    const optionMatches = cleanText.match(/[A-E][\)\.]?\s*([^A-E\(\)]*?)(?=[A-E][\)\.]|$)/gi)
+    
+    if (!optionMatches || optionMatches.length < 3) {
+      return null // Need at least 3 options
+    }
+
+    // Extract the question stem (text before first option)
+    const firstOptionIndex = cleanText.search(/[A-E][\)\.]/)
+    if (firstOptionIndex === -1) return null
+    
+    const stem = cleanText.substring(0, firstOptionIndex).trim()
+    if (stem.length < 10) return null // Question too short
+
+    // Parse options
+    const options = { a: '', b: '', c: '', d: '', e: '' }
+    const optionKeys: (keyof typeof options)[] = ['a', 'b', 'c', 'd', 'e']
+    
+    optionMatches.forEach((match, index) => {
+      if (index < 5) {
+        // Clean the option text
+        const optionText = match.replace(/^[A-E][\)\.]?\s*/, '').trim()
+        options[optionKeys[index]] = optionText
+      }
+    })
+
+    // Look for answer indicators
+    const answerPatterns = [
+      /(?:answer|resposta|gabarito)[\s:]*([A-E])/i,
+      /(?:correct|correta)[\s:]*([A-E])/i,
+      /([A-E])[\s\-]*(?:correct|correta)/i,
+      /\*([A-E])\*/, // Marked with asterisks
+      /\b([A-E])\s*✓/  // Marked with checkmark
+    ]
+
+    let correctOption = 'a' // Default
+    for (const pattern of answerPatterns) {
+      const match = cleanText.match(pattern)
+      if (match) {
+        correctOption = match[1].toLowerCase()
+        break
+      }
+    }
+
+    // Look for explanation
+    const explanationPatterns = [
+      /(?:explanation|explicação|comentário)[\s:]*(.+?)(?:\n|$)/i,
+      /(?:justificativa|resolução)[\s:]*(.+?)(?:\n|$)/i
+    ]
+
+    let explanation = ''
+    for (const pattern of explanationPatterns) {
+      const match = cleanText.match(pattern)
+      if (match) {
+        explanation = match[1].trim()
+        break
+      }
+    }
+
+    return {
+      title: '',
+      stem,
+      options,
+      correctOption,
+      explanation,
+      images: availableImages.slice(0, 2), // Max 2 images per question
+      difficulty: 'B1'
+    }
+  }
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      if (file.type.includes('wordprocessingml') || file.name.endsWith('.docx')) {
+        setSelectedFile(file)
+      } else {
+        toast.error('Please select a valid Word document (.docx)')
+      }
+    }
+  }
+
+  const handleImport = async () => {
+    if (!selectedFile || !selectedTopic) {
+      toast.error('Please select a file and topic')
       return
     }
 
-    setImporting(true)
-    
+    setIsProcessing(true)
+    setProgress(0)
+
     try {
-      // Show progress toast
-      const progressToast = toast.loading('Processing document...', {
-        description: 'Extracting questions and images from your document'
-      })
+      const questions = await processWordDocument(selectedFile)
       
-      const result = await wordParser.parseDocument(file)
-      
-      // Dismiss progress toast
-      toast.dismiss(progressToast)
-      
-      if (result.errors.length > 0) {
-        toast.error('Document parsing failed', {
-          description: result.errors[0]
-        })
+      if (questions.length === 0) {
+        toast.error('No questions found in the document')
         return
       }
 
-      if (result.questions.length === 0) {
-        toast.error('No questions were found in the document.', {
-          description: 'Please check that your document follows the expected format with numbered questions and multiple choice options.'
-        })
-        return
-      }
-
-      setParsingResult(result)
-      setPreviewMode(true)
-      
-      // Show detailed import summary
-      const stats = result.statistics
-      const summaryLines = [
-        `📊 Successfully detected ${stats.totalQuestions} question${stats.totalQuestions !== 1 ? 's' : ''}`,
-        `✅ ${stats.questionsWithAnswers} with correct answers`,
-        `🖼️ ${stats.questionsWithImages} with embedded images`,
-        `💡 ${stats.questionsWithExplanations} with explanations`,
-        `🏷️ ${stats.questionsWithTags} with tags`
-      ]
-
-      if (result.warnings.length > 0) {
-        summaryLines.push(`⚠️ ${result.warnings.length} warning${result.warnings.length !== 1 ? 's' : ''}`)
-      }
-
-      summaryLines.push('', '👀 Review the questions below and click Import when ready!')
-      
-      toast.success('Document parsed successfully!', {
-        description: summaryLines.join('\n'),
-        duration: 6000
-      })
+      setParsedQuestions(questions)
+      setProgress(100)
+      toast.success(`Successfully parsed ${questions.length} question(s)`)
       
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
-      toast.error('Failed to import questions from document', {
-        description: errorMessage
-      })
       console.error('Import error:', error)
+      toast.error('Failed to import questions from document')
     } finally {
-      setImporting(false)
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''
-      }
+      setIsProcessing(false)
     }
   }
 
-  const handleImportQuestions = () => {
-    if (!selectedTopic || !parsingResult) {
-      toast.error('Please select a topic for the imported questions')
-      return
+  const handleConfirmImport = () => {
+    if (parsedQuestions.length > 0 && selectedTopic) {
+      onQuestionsImported(parsedQuestions, selectedTopic)
+      setIsOpen(false)
+      setParsedQuestions([])
+      setSelectedFile(null)
+      setSelectedTopic('')
+      setProgress(0)
+      toast.success('Questions imported successfully!')
     }
+  }
 
-    const questionsWithTopic = parsingResult.questions.map(q => ({
-      ...q,
-      topicId: selectedTopic
-    }))
-
-    onQuestionsImported(questionsWithTopic)
-    setParsingResult(null)
-    setPreviewMode(false)
+  const resetImport = () => {
+    setSelectedFile(null)
     setSelectedTopic('')
-    
-    toast.success(`${questionsWithTopic.length} questions imported successfully`)
+    setParsedQuestions([])
+    setProgress(0)
+    setIsProcessing(false)
+    setProcessingStatus('')
   }
 
-  const editQuestion = (index: number, field: string, value: any) => {
-    if (!parsingResult) return
-    
-    const updatedQuestions = parsingResult.questions.map((q, i) => 
-      i === index ? { ...q, [field]: value } : q
-    )
-    
-    setParsingResult({
-      ...parsingResult,
-      questions: updatedQuestions
-    })
-  }
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline">
+          <Upload className="h-4 w-4 mr-2" />
+          Import from Word
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Import Questions from Word Document
+          </DialogTitle>
+          <DialogDescription>
+            Upload a Word document (.docx) containing questions with multiple choice options.
+            The system will automatically detect questions and extract images.
+          </DialogDescription>
+        </DialogHeader>
 
-  if (previewMode && parsingResult && parsingResult.questions.length > 0) {
-    const { questions, statistics, warnings, errors } = parsingResult
-    
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Eye size={20} />
-            Preview Imported Questions ({questions.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <Label htmlFor="topic-select">Assign to Topic</Label>
+        <div className="space-y-6">
+          {/* File Upload Section */}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="file-upload">Select Word Document</Label>
+              <div className="flex items-center gap-4">
+                <input
+                  id="file-upload"
+                  type="file"
+                  accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                <Button 
+                  variant="outline" 
+                  onClick={() => document.getElementById('file-upload')?.click()}
+                  className="flex-1"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  {selectedFile ? selectedFile.name : 'Choose File'}
+                </Button>
+                {selectedFile && (
+                  <Badge variant="outline" className="px-3">
+                    {(selectedFile.size / 1024 / 1024).toFixed(1)} MB
+                  </Badge>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Target Topic</Label>
               <Select value={selectedTopic} onValueChange={setSelectedTopic}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a topic" />
+                  <SelectValue placeholder="Select a topic for the imported questions" />
                 </SelectTrigger>
                 <SelectContent>
-                  {topics.map((topic) => (
+                  {topics.map((topic: any) => (
                     <SelectItem key={topic.id} value={topic.id}>
                       {topic.name}
                     </SelectItem>
@@ -159,284 +315,128 @@ export default function WordImport({ onQuestionsImported }: WordImportProps) {
                 </SelectContent>
               </Select>
             </div>
-            
-            <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setParsingResult(null)
-                  setPreviewMode(false)
-                }}
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleImportQuestions}
-                disabled={!selectedTopic}
-              >
-                Import {questions.length} Questions
-              </Button>
-            </div>
           </div>
 
-          {/* Show warnings and errors */}
-          {warnings.length > 0 && (
-            <Alert>
-              <Warning className="h-4 w-4" />
-              <AlertDescription>
-                <strong>Warnings ({warnings.length}):</strong>
-                <ul className="mt-1 text-sm list-disc list-inside">
-                  {warnings.slice(0, 5).map((warning, index) => (
-                    <li key={index}>{warning}</li>
-                  ))}
-                  {warnings.length > 5 && <li>... and {warnings.length - 5} more</li>}
-                </ul>
-              </AlertDescription>
-            </Alert>
+          {/* Processing Section */}
+          {isProcessing && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                <span className="text-sm">{processingStatus}</span>
+              </div>
+              <Progress value={progress} className="w-full" />
+            </div>
           )}
 
-          {errors.length > 0 && (
-            <Alert variant="destructive">
-              <XCircle className="h-4 w-4" />
-              <AlertDescription>
-                <strong>Errors ({errors.length}):</strong>
-                <ul className="mt-1 text-sm list-disc list-inside">
-                  {errors.map((error, index) => (
-                    <li key={index}>{error}</li>
-                  ))}
-                </ul>
-              </AlertDescription>
-            </Alert>
-          )}
+          {/* Parsed Questions Preview */}
+          {parsedQuestions.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="text-lg font-semibold">
+                  Found {parsedQuestions.length} Question(s)
+                </h4>
+                <Badge variant="outline">
+                  Ready to import
+                </Badge>
+              </div>
 
-          {/* Enhanced Import Statistics */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 p-4 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-lg border">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-primary">{statistics.totalQuestions}</div>
-              <div className="text-sm text-muted-foreground">Total Questions</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-secondary">{statistics.questionsWithAnswers}</div>
-              <div className="text-sm text-muted-foreground">With Answers</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-accent">{statistics.questionsWithImages}</div>
-              <div className="text-sm text-muted-foreground">With Images</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-muted-foreground">{statistics.questionsWithExplanations}</div>
-              <div className="text-sm text-muted-foreground">With Explanations</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-orange-600">{statistics.questionsWithTags}</div>
-              <div className="text-sm text-muted-foreground">With Tags</div>
-            </div>
-          </div>
+              <Alert>
+                <CheckCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Questions parsed successfully! Review them below and click "Import Questions" to add them to your database.
+                </AlertDescription>
+              </Alert>
 
-          <Separator />
-
-          <div className="space-y-6">
-            {questions.map((question, index) => (
-              <Card key={question.id} className="border-l-4 border-l-primary">
-                <CardContent className="p-4 space-y-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Label className="font-medium">Question {index + 1}</Label>
-                        <Badge variant="secondary">{question.difficulty}</Badge>
-                        {question.tags && question.tags.length > 0 && question.tags.map(tag => (
-                          <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>
-                        ))}
-                        {question.correctAnswer && (
-                          <Badge variant="default" className="bg-green-600">
-                            ✓ Answer: {question.correctAnswer}
+              <div className="max-h-96 overflow-y-auto space-y-4">
+                {parsedQuestions.map((question, index) => (
+                  <Card key={index}>
+                    <CardHeader>
+                      <CardTitle className="text-base">
+                        Question {index + 1}
+                        {question.images.length > 0 && (
+                          <Badge variant="secondary" className="ml-2">
+                            <Image className="h-3 w-3 mr-1" />
+                            {question.images.length} image(s)
                           </Badge>
                         )}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Question:</p>
+                        <p className="text-sm">{question.stem.substring(0, 200)}...</p>
                       </div>
-                      <Textarea
-                        value={question.stem}
-                        onChange={(e) => editQuestion(index, 'stem', e.target.value)}
-                        className="mt-1"
-                        rows={3}
-                        placeholder="Question text..."
-                      />
-                    </div>
-                  </div>
-
-                  {/* Display question images if any */}
-                  {question.images && question.images.length > 0 && (
-                    <div>
-                      <Label>Images</Label>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-1">
-                        {question.images.map((image, imgIndex) => (
-                          <div key={imgIndex} className="relative">
-                            <img 
-                              src={image} 
-                              alt={`Question ${index + 1} image ${imgIndex + 1}`}
-                              className="w-full h-20 object-cover rounded border"
-                            />
-                          </div>
-                        ))}
+                      
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Options:</p>
+                        <div className="grid grid-cols-1 gap-1 text-xs">
+                          {Object.entries(question.options).map(([key, value]) => (
+                            <div key={key} className="flex items-center gap-2">
+                              <Badge 
+                                variant={key === question.correctOption ? "default" : "outline"}
+                                className="w-6 h-6 p-0 text-xs"
+                              >
+                                {key.toUpperCase()}
+                              </Badge>
+                              <span className={key === question.correctOption ? "font-medium" : ""}>
+                                {value.substring(0, 100)}{value.length > 100 ? '...' : ''}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {Object.entries(question.options).map(([letter, option]) => (
-                      <div key={letter} className="flex items-center gap-2">
-                        <Label className="w-6 font-mono">{letter})</Label>
-                        <Input
-                          value={option}
-                          onChange={(e) => editQuestion(index, 'options', {
-                            ...question.options,
-                            [letter]: e.target.value
-                          })}
-                          className={
-                            question.correctAnswer === letter 
-                              ? 'border-green-500 bg-green-50' 
-                              : ''
-                          }
-                          placeholder={`Option ${letter}`}
-                        />
-                        {question.correctAnswer === letter && (
-                          <CheckCircle size={16} className="text-green-600" />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  {question.explanation && (
-                    <div>
-                      <Label>Explanation</Label>
-                      <Textarea
-                        value={question.explanation}
-                        onChange={(e) => editQuestion(index, 'explanation', e.target.value)}
-                        className="mt-1"
-                        rows={2}
-                        placeholder="Explanation for the correct answer..."
-                      />
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <FileText size={20} />
-          Import Questions from Word Document
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="text-center py-8 border-2 border-dashed border-muted-foreground/25 rounded-lg">
-            <div className="flex flex-col items-center space-y-4">
-              <div className="p-4 rounded-full bg-muted">
-                <Upload size={32} className="text-muted-foreground" />
+                      {question.explanation && (
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground">Explanation:</p>
+                          <p className="text-xs text-muted-foreground">
+                            {question.explanation.substring(0, 150)}...
+                          </p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
-              
-              <div>
-                <h3 className="text-lg font-semibold">Import Word Document</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Upload a Word document containing questions with the following format:
-                </p>
-              </div>
-
-              <Button 
-                onClick={() => fileInputRef.current?.click()}
-                disabled={importing}
-                className="w-auto"
-              >
-                {importing ? 'Processing...' : 'Select Document'}
-              </Button>
-
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".doc,.docx,.txt"
-                onChange={handleFileSelect}
-                className="hidden"
-              />
             </div>
-          </div>
+          )}
 
-          <div className="bg-muted/50 p-4 rounded-lg">
-            <h4 className="font-medium mb-2">📝 Expected Format (Flexible):</h4>
-            <pre className="text-sm text-muted-foreground whitespace-pre-wrap">
-{`1. What is the present tense of "to be" for "I"?
-A) am
-B) is
-C) are
-D) was
-E) were
-
-Correct Answer: A
-Explanation: The present tense of "to be" for first person singular is "am".
-Difficulty: A1
-Tags: grammar, present tense
-
-2. Choose the correct article: "I saw ___ elephant."
-A) a
-B) an
-C) the
-D) some
-E) any
-
-Correct Answer: B
-Explanation: Use "an" before words starting with vowel sounds.
-Difficulty: A1
-Tags: grammar, articles`}
-            </pre>
-          </div>
-
-          <div className="text-sm text-muted-foreground space-y-3">
-            <div>
-              <h4 className="font-medium text-foreground mb-1">🔧 Supported formats:</h4>
-              <ul className="list-disc list-inside ml-2 space-y-1">
-                <li><strong>.docx files:</strong> Full support with embedded images and formatting</li>
-                <li><strong>.doc files:</strong> Basic text extraction</li>
-                <li><strong>.txt files:</strong> Plain text parsing</li>
+          {/* Instructions */}
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="text-xs">
+              <strong>Document Format Tips:</strong>
+              <ul className="list-disc list-inside mt-2 space-y-1">
+                <li>Questions should be numbered or clearly separated</li>
+                <li>Use A), B), C), D), E) or (A), (B), (C), (D), (E) for options</li>
+                <li>Mark correct answers with "Answer: A" or "Correct: A"</li>
+                <li>Include explanations with "Explanation:" or "Comentário:"</li>
+                <li>Images will be extracted automatically</li>
               </ul>
-            </div>
-
-            <div>
-              <h4 className="font-medium text-foreground mb-1">🤖 Auto-detection features:</h4>
-              <ul className="list-disc list-inside ml-2 space-y-1">
-                <li><strong>Smart Question Detection:</strong> Finds questions even with varied formatting</li>
-                <li><strong>Flexible Answer Patterns:</strong> Detects A-E options in multiple formats</li>
-                <li><strong>Image Extraction:</strong> Automatically extracts embedded images from .docx files</li>
-                <li><strong>Metadata Parsing:</strong> Extracts difficulty, tags, and explanations</li>
-                <li><strong>Answer Detection:</strong> Auto-identifies correct answers or provides fallbacks</li>
-                <li><strong>Format Flexibility:</strong> Handles various question numbering and styling</li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-medium text-foreground mb-1">📊 Import Statistics:</h4>
-              <p className="ml-2">After processing, you'll see a detailed breakdown with question count, answers detected, images found, and explanations available.</p>
-            </div>
-
-            <div>
-              <h4 className="font-medium text-foreground mb-1">💡 Tips for best results:</h4>
-              <ul className="list-disc list-inside ml-2 space-y-1">
-                <li>Number your questions (1., 2., 3., etc.)</li>
-                <li>Use A), B), C), D), E) for options</li>
-                <li>Include "Correct Answer: X" line</li>
-                <li>Add explanations with "Explanation: ..." line</li>
-                <li>Specify difficulty with "Difficulty: A1/A2/B1/B2/C1/C2"</li>
-                <li>Add tags with "Tags: comma, separated, values"</li>
-              </ul>
-            </div>
-          </div>
+            </AlertDescription>
+          </Alert>
         </div>
-      </CardContent>
-    </Card>
+
+        <DialogFooter className="gap-2">
+          <Button variant="outline" onClick={resetImport}>
+            Reset
+          </Button>
+          {parsedQuestions.length > 0 ? (
+            <Button onClick={handleConfirmImport}>
+              <Plus className="h-4 w-4 mr-2" />
+              Import {parsedQuestions.length} Question(s)
+            </Button>
+          ) : (
+            <Button 
+              onClick={handleImport} 
+              disabled={!selectedFile || !selectedTopic || isProcessing}
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              {isProcessing ? 'Processing...' : 'Parse Document'}
+            </Button>
+          )}
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
