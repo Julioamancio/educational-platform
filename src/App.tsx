@@ -80,7 +80,7 @@ function AppContent() {
     <div className="min-h-screen bg-background">
       <Sidebar currentView={currentView} onViewChange={handleViewChange} />
       <main className="lg:pl-64">
-        <div className="p-6 lg:p-8">
+        <div className="p-4 lg:p-8">
           {renderMainContent()}
         </div>
       </main>

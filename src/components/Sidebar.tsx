@@ -4,15 +4,21 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { useAuth } from '@/contexts/AuthContext'
 import { 
   House, 
-  Book, 
+  BookOpen as Topics, 
+  FileText,
   Question, 
-  ChartLine, 
-  Gear, 
+  ChartLineUp, 
+  GearSix, 
+  Student,
   Users, 
   Article, 
   SignOut,
   List,
-  BookOpen
+  BookOpenText,
+  Brain,
+  TrendUp,
+  ClockCounterClockwise,
+  GraduationCap
 } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 
@@ -27,19 +33,19 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
 
   const adminMenuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: House },
-    { id: 'topics', label: 'Topics', icon: Book },
-    { id: 'contents', label: 'Contents', icon: Article },
+    { id: 'topics', label: 'Topics', icon: Topics },
+    { id: 'contents', label: 'Contents', icon: FileText },
     { id: 'questions', label: 'Questions', icon: Question },
-    { id: 'reports', label: 'Reports', icon: ChartLine },
-    { id: 'settings', label: 'Settings', icon: Gear },
+    { id: 'reports', label: 'Reports', icon: ChartLineUp },
+    { id: 'settings', label: 'Settings', icon: GearSix },
   ]
 
   const studentMenuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: House },
-    { id: 'topics', label: 'Topics', icon: Book },
-    { id: 'practice', label: 'Practice', icon: Question },
-    { id: 'review', label: 'Review', icon: BookOpen },
-    { id: 'progress', label: 'Progress', icon: ChartLine },
+    { id: 'topics', label: 'Topics', icon: Topics },
+    { id: 'practice', label: 'Practice', icon: Brain },
+    { id: 'review', label: 'Review', icon: ClockCounterClockwise },
+    { id: 'progress', label: 'Progress', icon: TrendUp },
   ]
 
   const menuItems = user?.role === 'admin' ? adminMenuItems : studentMenuItems
@@ -48,7 +54,7 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
     <div className="flex flex-col h-full">
       <div className="p-6 border-b">
         <div className="flex items-center gap-3">
-          <Book className="w-8 h-8 text-primary" />
+          <GraduationCap className="w-8 h-8 text-primary" weight="duotone" />
           <div>
             <h2 className="font-bold text-lg">EduPlatform</h2>
             <p className="text-sm text-muted-foreground capitalize">{user?.role}</p>
@@ -65,15 +71,15 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
                 <Button
                   variant={currentView === item.id ? 'default' : 'ghost'}
                   className={cn(
-                    "w-full justify-start gap-3",
-                    currentView === item.id && "bg-primary text-primary-foreground"
+                    "w-full justify-start gap-3 sidebar-item",
+                    currentView === item.id && "bg-primary text-primary-foreground shadow-md"
                   )}
                   onClick={() => {
                     onViewChange(item.id)
                     setIsMobileOpen(false)
                   }}
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-5 h-5 icon-enhance" weight="duotone" />
                   {item.label}
                 </Button>
               </li>
@@ -84,7 +90,7 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
       
       <div className="p-4 border-t">
         <div className="flex items-center gap-3 mb-3 p-2">
-          <Users className="w-5 h-5 text-muted-foreground" />
+          <Student className="w-5 h-5 text-muted-foreground" weight="duotone" />
           <div className="flex-1 min-w-0">
             <p className="font-medium truncate">{user?.name}</p>
             <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
@@ -95,7 +101,7 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
           className="w-full justify-start gap-3"
           onClick={logout}
         >
-          <SignOut className="w-4 h-4" />
+          <SignOut className="w-4 h-4" weight="bold" />
           Logout
         </Button>
       </div>
@@ -117,7 +123,7 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
             size="icon"
             className="lg:hidden fixed top-4 left-4 z-40"
           >
-            <List className="w-5 h-5" />
+            <List className="w-5 h-5" weight="bold" />
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="p-0 w-64">

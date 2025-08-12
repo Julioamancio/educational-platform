@@ -9,6 +9,35 @@
   body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
+  
+  /* Enhanced visual hierarchy and focus styles */
+  .sidebar-item {
+    @apply transition-all duration-200 ease-in-out;
+  }
+  
+  .sidebar-item:hover {
+    @apply scale-[1.02] translate-x-1;
+  }
+  
+  .card-hover {
+    @apply transition-all duration-200 ease-in-out hover:shadow-lg hover:scale-[1.02];
+  }
+  
+  .icon-enhance {
+    @apply transition-all duration-200 ease-in-out;
+  }
+  
+  .icon-enhance:hover {
+    @apply scale-110;
+  }
+  
+  .btn-primary {
+    @apply bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary transition-all duration-200 shadow-lg hover:shadow-xl;
+  }
+  
+  .btn-secondary {
+    @apply bg-gradient-to-r from-secondary to-secondary/90 hover:from-secondary/90 hover:to-secondary transition-all duration-200;
+  }
 }
 
 :root {

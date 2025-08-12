@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch'
 import { useKV } from '@github/spark/hooks'
 import { Topic } from '@/types'
-import { Plus, Edit, Trash2, Book } from '@phosphor-icons/react'
+import { Plus, PencilSimple, Trash, BookOpen, ToggleLeft, ToggleRight } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 export default function TopicsManagement() {
@@ -85,7 +85,7 @@ export default function TopicsManagement() {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => setEditingTopic(null)}>
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus className="w-4 h-4 mr-2" weight="bold" />
               Add Topic
             </Button>
           </DialogTrigger>
@@ -190,7 +190,7 @@ export default function TopicsManagement() {
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2">
-                  <Book className="w-5 h-5 text-primary" />
+                  <BookOpen className="w-5 h-5 text-primary" weight="duotone" />
                   <CardTitle className="text-lg">{topic.name}</CardTitle>
                 </div>
                 <div className="flex gap-1">
@@ -199,14 +199,14 @@ export default function TopicsManagement() {
                     variant="ghost"
                     onClick={() => handleEdit(topic)}
                   >
-                    <Edit className="w-4 h-4" />
+                    <PencilSimple className="w-4 h-4" weight="bold" />
                   </Button>
                   <Button
                     size="sm"
                     variant="ghost"
                     onClick={() => handleDelete(topic.id)}
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash className="w-4 h-4" weight="bold" />
                   </Button>
                 </div>
               </div>
@@ -236,13 +236,13 @@ export default function TopicsManagement() {
         {topics.length === 0 && (
           <Card className="col-span-full">
             <CardContent className="flex flex-col items-center justify-center py-12">
-              <Book className="w-12 h-12 text-muted-foreground mb-4" />
+              <BookOpen className="w-12 h-12 text-muted-foreground mb-4" weight="duotone" />
               <h3 className="font-semibold mb-2">No topics yet</h3>
               <p className="text-muted-foreground text-center mb-4">
                 Create your first topic to start organizing your content
               </p>
               <Button onClick={() => setIsDialogOpen(true)}>
-                <Plus className="w-4 h-4 mr-2" />
+                <Plus className="w-4 h-4 mr-2" weight="bold" />
                 Create First Topic
               </Button>
             </CardContent>

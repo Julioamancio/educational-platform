@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/contexts/AuthContext'
-import { Book, UserCircle } from '@phosphor-icons/react'
+import { GraduationCap, UserCircle, SignIn, UserPlus } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 export default function LoginPage() {
@@ -52,7 +52,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Book className="w-8 h-8 text-primary" />
+            <GraduationCap className="w-8 h-8 text-primary" weight="duotone" />
             <CardTitle className="text-2xl font-bold">EduPlatform</CardTitle>
           </div>
           <CardDescription>
@@ -89,7 +89,7 @@ export default function LoginPage() {
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  <UserCircle className="w-4 h-4 mr-2" />
+                  <SignIn className="w-4 h-4 mr-2" weight="bold" />
                   {isLoading ? 'Logging in...' : 'Login'}
                 </Button>
               </form>
@@ -136,7 +136,7 @@ export default function LoginPage() {
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  <UserCircle className="w-4 h-4 mr-2" />
+                  <UserPlus className="w-4 h-4 mr-2" weight="bold" />
                   {isLoading ? 'Creating account...' : 'Create Account'}
                 </Button>
               </form>

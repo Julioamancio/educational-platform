@@ -3,7 +3,7 @@ import { Progress } from '@/components/ui/progress'
 import { useAuth } from '@/contexts/AuthContext'
 import { useKV } from '@github/spark/hooks'
 import { Topic, Content, Question, Attempt, StudyLog } from '@/types'
-import { Book, Question as QuestionIcon, TrendUp, Users, CheckCircle } from '@phosphor-icons/react'
+import { Book, Question as QuestionIcon, TrendUp, Users, CheckCircle, GraduationCap, ClockCounterClockwise, Target } from '@phosphor-icons/react'
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -30,40 +30,40 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
+          <Card className="card-hover">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Total Students</CardTitle>
-              <Users className="w-4 h-4 text-muted-foreground" />
+              <Users className="w-4 h-4 text-muted-foreground icon-enhance" weight="duotone" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{totalStudents}</div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="card-hover">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Published Questions</CardTitle>
-              <QuestionIcon className="w-4 h-4 text-muted-foreground" />
+              <QuestionIcon className="w-4 h-4 text-muted-foreground icon-enhance" weight="duotone" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{totalQuestions}</div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="card-hover">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Total Attempts</CardTitle>
-              <TrendUp className="w-4 h-4 text-muted-foreground" />
+              <TrendUp className="w-4 h-4 text-muted-foreground icon-enhance" weight="duotone" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{totalAttempts}</div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="card-hover">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Avg Accuracy</CardTitle>
-              <CheckCircle className="w-4 h-4 text-muted-foreground" />
+              <Target className="w-4 h-4 text-muted-foreground icon-enhance" weight="duotone" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{avgAccuracy}%</div>
@@ -170,30 +170,30 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+        <Card className="card-hover">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Study Sessions</CardTitle>
-            <Book className="w-4 h-4 text-muted-foreground" />
+            <Book className="w-4 h-4 text-muted-foreground icon-enhance" weight="duotone" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{userStudyLogs.length}</div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="card-hover">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Questions Answered</CardTitle>
-            <QuestionIcon className="w-4 h-4 text-muted-foreground" />
+            <QuestionIcon className="w-4 h-4 text-muted-foreground icon-enhance" weight="duotone" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{userAttempts.length}</div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="card-hover">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Overall Accuracy</CardTitle>
-            <CheckCircle className="w-4 h-4 text-muted-foreground" />
+            <Target className="w-4 h-4 text-muted-foreground icon-enhance" weight="duotone" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">

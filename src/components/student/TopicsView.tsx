@@ -6,7 +6,7 @@ import { Progress } from '@/components/ui/progress'
 import { useKV } from '@github/spark/hooks'
 import { useAuth } from '@/contexts/AuthContext'
 import { Topic, Content, Question, StudyLog, Attempt } from '@/types'
-import { Book, Question as QuestionIcon, Clock, Play, CheckCircle } from '@phosphor-icons/react'
+import { BookOpen, Brain, Clock, Play, Target, TrendUp } from '@phosphor-icons/react'
 
 interface TopicsViewProps {
   onViewChange: (view: string, data?: any) => void
@@ -68,11 +68,11 @@ export default function TopicsView({ onViewChange }: TopicsViewProps) {
           const progress = getTopicProgress(topic)
           
           return (
-            <Card key={topic.id} className="hover:shadow-lg transition-shadow">
+            <Card key={topic.id} className="card-hover">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
-                    <Book className="w-5 h-5 text-primary" />
+                    <BookOpen className="w-5 h-5 text-primary icon-enhance" weight="duotone" />
                     <CardTitle className="text-lg">{topic.name}</CardTitle>
                   </div>
                   <Badge variant="outline">{topic.levelMin} - {topic.levelMax}</Badge>
@@ -90,18 +90,18 @@ export default function TopicsView({ onViewChange }: TopicsViewProps) {
                 
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="flex items-center gap-2">
-                    <Book className="w-4 h-4 text-muted-foreground" />
+                    <BookOpen className="w-4 h-4 text-muted-foreground" weight="duotone" />
                     <span>{progress.studiedContents}/{progress.totalContents} studied</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <QuestionIcon className="w-4 h-4 text-muted-foreground" />
+                    <Brain className="w-4 h-4 text-muted-foreground" weight="duotone" />
                     <span>{progress.answeredQuestions}/{progress.totalQuestions} correct</span>
                   </div>
                 </div>
                 
                 {progress.accuracy > 0 && (
                   <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="w-4 h-4 text-secondary" />
+                    <Target className="w-4 h-4 text-secondary" weight="duotone" />
                     <span>{progress.accuracy}% accuracy</span>
                   </div>
                 )}
@@ -112,7 +112,7 @@ export default function TopicsView({ onViewChange }: TopicsViewProps) {
                     className="flex-1"
                     onClick={() => onViewChange('study', { topicId: topic.id })}
                   >
-                    <Book className="w-4 h-4 mr-2" />
+                    <BookOpen className="w-4 h-4 mr-2" weight="bold" />
                     Study
                   </Button>
                   <Button 
@@ -120,7 +120,7 @@ export default function TopicsView({ onViewChange }: TopicsViewProps) {
                     className="flex-1"
                     onClick={() => onViewChange('practice', { topicId: topic.id })}
                   >
-                    <Play className="w-4 h-4 mr-2" />
+                    <Play className="w-4 h-4 mr-2" weight="bold" />
                     Practice
                   </Button>
                 </div>
