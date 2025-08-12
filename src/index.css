@@ -64,9 +64,6 @@
   }
   
 
-  
-  /* Enhanced button styles */
-  .btn-modern {
     @apply relative overflow-hidden transition-all duration-200 ease-in-out;
   }
   
