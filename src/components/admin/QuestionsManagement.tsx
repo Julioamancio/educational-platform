@@ -11,12 +11,13 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useKV } from '@github/spark/hooks'
 import { Topic, Question } from '@/types'
-import { Plus, PencilSimple, Trash, Question as QuestionIcon, Eye, EyeSlash, Upload, FileText, Brain, Target, Pencil as Edit } from '@phosphor-icons/react'
+import { Plus, PencilSimple, Trash, Question as QuestionIcon, Eye, EyeSlash, Upload, FileText, Brain, Target, Pencil } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import MediaUpload from '@/components/MediaUpload'
 import WordImport from '@/components/admin/WordImport'
 import SampleDocuments from '@/components/admin/SampleDocuments'
 import ImportTest from '@/components/admin/ImportTest'
+import WordImportTester from '@/components/admin/WordImportTester'
 
 export default function QuestionsManagement() {
   const [topics] = useKV<Topic[]>('topics', [])
@@ -133,7 +134,7 @@ export default function QuestionsManagement() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="manage" className="flex items-center gap-2">
             <QuestionIcon size={16} />
             Manage Questions
@@ -147,8 +148,12 @@ export default function QuestionsManagement() {
             Media Library
           </TabsTrigger>
           <TabsTrigger value="test" className="flex items-center gap-2">
-            <QuestionIcon size={16} />
+            <Brain size={16} />
             Test Parser
+          </TabsTrigger>
+          <TabsTrigger value="word-tester" className="flex items-center gap-2">
+            <Target size={16} />
+            Word Testing
           </TabsTrigger>
         </TabsList>
 
@@ -486,6 +491,10 @@ export default function QuestionsManagement() {
         <TabsContent value="test" className="space-y-6">
           <ImportTest />
           <SampleDocuments />
+        </TabsContent>
+
+        <TabsContent value="word-tester" className="space-y-6">
+          <WordImportTester />
         </TabsContent>
       </Tabs>
     </div>

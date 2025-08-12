@@ -109,6 +109,7 @@ export default function WordImport({ onQuestionsImported }: WordImportProps) {
       /(\d+[\.\)])\s*([^]*?)(?=\d+[\.\)]|$)/g, // 1. question content 2. question content
       /(Question\s*\d+:?)\s*([^]*?)(?=Question\s*\d+|$)/gi, // Question 1: content Question 2: content
       /(Questão\s*\d+:?)\s*([^]*?)(?=Questão\s*\d+|$)/gi, // Questão 1: content Questão 2: content
+      /(Q\d+[\.\)])\s*([^]*?)(?=Q\d+|$)/gi, // Q1. content Q2. content
       /(<p[^>]*>.*?<\/p>(?:\s*<p[^>]*>.*?<\/p>)*)/gi // Paragraph groups
     ]
     
@@ -118,28 +119,53 @@ export default function WordImport({ onQuestionsImported }: WordImportProps) {
     const numberedMatches = Array.from(textContent.matchAll(/(\d+[\.\)])\s*([^]*?)(?=\d+[\.\)]|$)/g))
     if (numberedMatches.length >= 2) {
       questionSections = numberedMatches.map(match => match[0])
+      console.log(`Found ${numberedMatches.length} numbered questions`)
     } else {
       // Try question keyword pattern
-      const keywordMatches = Array.from(textContent.matchAll(/((?:Question|Questão)\s*\d+:?)\s*([^]*?)(?=(?:Question|Questão)\s*\d+|$)/gi))
+      const keywordMatches = Array.from(textContent.matchAll(/((?:Question|Questão|Q)\s*\d+:?)\s*([^]*?)(?=(?:Question|Questão|Q)\s*\d+|$)/gi))
       if (keywordMatches.length >= 2) {
         questionSections = keywordMatches.map(match => match[0])
+        console.log(`Found ${keywordMatches.length} keyword questions`)
       } else {
-        // Fall back to paragraph splitting with option detection
+        // Enhanced paragraph splitting with better option detection
         const paragraphs = textContent.split(/\n\s*\n/)
         const questionsFound: string[] = []
         let currentQuestion = ''
+        let accumulatedText = ''
         
-        for (const paragraph of paragraphs) {
-          const hasOptions = /[A-E][\)\.\-:]?\s+[^\n]*/.test(paragraph)
-          const hasQuestionNumber = /^\d+[\.\)]/.test(paragraph.trim())
+        for (let i = 0; i < paragraphs.length; i++) {
+          const paragraph = paragraphs[i].trim()
           
-          if (hasQuestionNumber || (currentQuestion && hasOptions)) {
+          if (!paragraph) continue
+          
+          const hasQuestionNumber = /^\d+[\.\)]/.test(paragraph) || /^Question\s*\d+/i.test(paragraph) || /^Questão\s*\d+/i.test(paragraph)
+          const hasOptions = /[A-E][\)\.\-:]?\s+[^\n]{3,}/.test(paragraph)
+          const optionCount = (paragraph.match(/[A-E][\)\.\-:]?\s+[^\n]/g) || []).length
+          
+          console.log(`Paragraph ${i}: hasNumber=${hasQuestionNumber}, hasOptions=${hasOptions}, optionCount=${optionCount}`)
+          
+          if (hasQuestionNumber) {
+            // Start of a new question
             if (currentQuestion) {
               questionsFound.push(currentQuestion)
             }
             currentQuestion = paragraph
-          } else if (currentQuestion) {
-            currentQuestion += '\n\n' + paragraph
+            accumulatedText = paragraph
+          } else if (hasOptions && optionCount >= 2) {
+            // This might be options for the current question
+            if (currentQuestion) {
+              currentQuestion += '\n\n' + paragraph
+            } else {
+              // Standalone options - use accumulated text as question
+              currentQuestion = accumulatedText + '\n\n' + paragraph
+            }
+          } else if (paragraph.length > 10) {
+            // Regular text - could be part of question stem or answer/explanation
+            if (currentQuestion) {
+              currentQuestion += '\n\n' + paragraph
+            } else {
+              accumulatedText += (accumulatedText ? '\n\n' : '') + paragraph
+            }
           }
         }
         
@@ -147,26 +173,63 @@ export default function WordImport({ onQuestionsImported }: WordImportProps) {
           questionsFound.push(currentQuestion)
         }
         
-        questionSections = questionsFound.filter(q => q.trim().length > 50)
+        questionSections = questionsFound.filter(q => {
+          const optionsInSection = (q.match(/[A-E][\)\.\-:]?\s+[^\n]/g) || []).length
+          return q.trim().length > 50 && optionsInSection >= 3
+        })
+        console.log(`Found ${questionSections.length} paragraph-based questions`)
       }
     }
 
     // If still no sections found, try a more aggressive approach
     if (questionSections.length === 0) {
-      // Look for any text blocks with options
-      const textBlocks = textContent.split(/\n\s*\n/)
-      questionSections = textBlocks.filter(block => {
-        const hasMultipleOptions = (block.match(/[A-E][\)\.\-:]?\s+/g) || []).length >= 3
-        return block.trim().length > 100 && hasMultipleOptions
+      console.log('No questions found with standard patterns, trying aggressive parsing...')
+      
+      // Look for any text blocks with multiple options
+      const lines = textContent.split('\n').map(line => line.trim()).filter(line => line.length > 0)
+      let currentSection = ''
+      const sections: string[] = []
+      
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i]
+        const nextLine = lines[i + 1] || ''
+        
+        // Check if this line could start a new question
+        const isQuestionStart = /^\d+[\.\)]/.test(line) || 
+                               /^Question\s*\d+/i.test(line) || 
+                               /^Questão\s*\d+/i.test(line) ||
+                               /^Q\d+[\.\)]/.test(line)
+        
+        if (isQuestionStart) {
+          if (currentSection) {
+            sections.push(currentSection)
+          }
+          currentSection = line
+        } else {
+          currentSection += (currentSection ? '\n' : '') + line
+        }
+      }
+      
+      if (currentSection) {
+        sections.push(currentSection)
+      }
+      
+      questionSections = sections.filter(section => {
+        const optionsInSection = (section.match(/[A-E][\)\.\-:]?\s+/g) || []).length
+        return section.length > 100 && optionsInSection >= 3
       })
+      
+      console.log(`Aggressive parsing found ${questionSections.length} sections`)
     }
 
     let imageIndex = 0
 
     questionSections.forEach((section, index) => {
       try {
+        console.log(`Processing question section ${index + 1}:`, section.substring(0, 100) + '...')
+        
         // Find images that might belong to this question
-        const sectionImages = images.slice(imageIndex, imageIndex + 3) // Max 3 images per question
+        const sectionImages = images.slice(imageIndex, Math.min(imageIndex + 3, images.length))
         
         const questionData = parseIndividualQuestionEnhanced(section.trim(), sectionImages)
         if (questionData && Object.values(questionData.options).filter(opt => opt.trim()).length >= 3) {
@@ -176,12 +239,22 @@ export default function WordImport({ onQuestionsImported }: WordImportProps) {
             difficulty: 'B1'
           })
           
+          console.log(`Successfully parsed question ${questions.length}:`, {
+            stem: questionData.stem.substring(0, 50) + '...',
+            optionsCount: Object.values(questionData.options).filter(opt => opt.trim()).length,
+            correctOption: questionData.correctOption,
+            hasExplanation: !!questionData.explanation,
+            imageCount: questionData.images.length
+          })
+          
           // Advance image index based on detected images
           if (questionData.images.length > 0) {
             imageIndex += questionData.images.length
           } else {
-            imageIndex += 1 // Assume one image per question if none detected
+            imageIndex += Math.min(1, images.length - imageIndex) // Assume one image per question if none detected
           }
+        } else {
+          console.warn(`Failed to parse section ${index}:`, questionData ? 'insufficient options' : 'null result')
         }
       } catch (error) {
         console.warn(`Failed to parse section ${index}:`, error)
@@ -194,6 +267,8 @@ export default function WordImport({ onQuestionsImported }: WordImportProps) {
   const parseIndividualQuestionEnhanced = (section: string, availableImages: any[]): ParsedQuestion | null => {
     // Clean and normalize the text
     const cleanText = section.replace(/\s+/g, ' ').trim()
+    
+    console.log('Parsing section:', cleanText.substring(0, 200) + '...')
     
     // Enhanced option detection with comprehensive patterns
     const optionPatterns = [
@@ -218,6 +293,8 @@ export default function WordImport({ onQuestionsImported }: WordImportProps) {
       const pattern = optionPatterns[i]
       const matches = Array.from(cleanText.matchAll(pattern))
       
+      console.log(`Pattern ${i + 1} found ${matches.length} matches`)
+      
       if (matches.length > bestPatternMatches) {
         bestPatternMatches = matches.length
         optionsData = {}
@@ -237,6 +314,7 @@ export default function WordImport({ onQuestionsImported }: WordImportProps) {
             
             if (cleanOptionText.length > 0) {
               optionsData[letter] = cleanOptionText
+              console.log(`Option ${letter.toUpperCase()}: ${cleanOptionText.substring(0, 50)}...`)
             }
           }
         })
@@ -245,9 +323,11 @@ export default function WordImport({ onQuestionsImported }: WordImportProps) {
     
     // If still no good options found, try line-by-line approach
     if (Object.keys(optionsData).length < 3) {
+      console.log('Trying line-by-line parsing...')
+      
       const lines = cleanText.split(/\n/)
       
-      lines.forEach(line => {
+      lines.forEach((line, lineIndex) => {
         const trimmedLine = line.trim()
         // Look for lines starting with A-E followed by various separators
         const linePatterns = [
@@ -264,6 +344,7 @@ export default function WordImport({ onQuestionsImported }: WordImportProps) {
             const text = lineMatch[2].trim()
             if (['a', 'b', 'c', 'd', 'e'].includes(letter) && text.length > 0) {
               optionsData[letter] = text
+              console.log(`Line ${lineIndex}: Option ${letter.toUpperCase()}: ${text.substring(0, 50)}...`)
               break
             }
           }
@@ -274,6 +355,8 @@ export default function WordImport({ onQuestionsImported }: WordImportProps) {
     
     // Enhanced fallback: look for any text after letters A-E
     if (Object.keys(optionsData).length < 3) {
+      console.log('Trying word-by-word parsing...')
+      
       // Split text and look for patterns like "A something B something"
       const words = cleanText.split(/\s+/)
       let currentLetter = ''
@@ -288,6 +371,7 @@ export default function WordImport({ onQuestionsImported }: WordImportProps) {
           // Save previous option if exists
           if (currentLetter && currentText.trim()) {
             optionsData[currentLetter.toLowerCase()] = currentText.trim()
+            console.log(`Word parsing - Option ${currentLetter}: ${currentText.trim().substring(0, 50)}...`)
           }
           
           currentLetter = letterMatch[1]
@@ -303,6 +387,7 @@ export default function WordImport({ onQuestionsImported }: WordImportProps) {
             currentText = currentText.replace(new RegExp(`\\s*${nextLetterMatch[0]}\\s*$`), '')
             if (currentText.trim()) {
               optionsData[currentLetter.toLowerCase()] = currentText.trim()
+              console.log(`Word parsing - Option ${currentLetter}: ${currentText.trim().substring(0, 50)}...`)
             }
             currentLetter = nextLetterMatch[1]
             currentText = ''
@@ -313,6 +398,7 @@ export default function WordImport({ onQuestionsImported }: WordImportProps) {
       // Don't forget the last option
       if (currentLetter && currentText.trim()) {
         optionsData[currentLetter.toLowerCase()] = currentText.trim()
+        console.log(`Word parsing - Final option ${currentLetter}: ${currentText.trim().substring(0, 50)}...`)
       }
       
       if (Object.keys(optionsData).length >= 3) {
@@ -322,6 +408,8 @@ export default function WordImport({ onQuestionsImported }: WordImportProps) {
     
     // Require at least 3 options to consider it a valid question
     const validOptions = Object.keys(optionsData).filter(key => optionsData[key].trim().length > 0)
+    console.log(`Found ${validOptions.length} valid options using ${usedPattern}`)
+    
     if (validOptions.length < 3) {
       console.warn('Insufficient valid options found:', validOptions.length, optionsData, 'Used pattern:', usedPattern)
       return null
@@ -372,6 +460,8 @@ export default function WordImport({ onQuestionsImported }: WordImportProps) {
       .replace(/^Q\d*[\.\):\s]+/i, '') // Remove "Q1.", "Q1)", etc.
       .trim()
     
+    console.log(`Extracted stem: ${stem.substring(0, 100)}...`)
+    
     if (stem.length < 5) {
       console.warn('Question stem too short:', stem.length, stem)
       return null
@@ -399,7 +489,8 @@ export default function WordImport({ onQuestionsImported }: WordImportProps) {
       /(?:solution|solução)[\s:]*([A-E])/i,
       /(?:letra|letter)[\s:]*([A-E])/i,
       /(?:alternativa|alternative)[\s:]*([A-E])/i,
-      /(?:opção|option)[\s:]*([A-E])/i
+      /(?:opção|option)[\s:]*([A-E])/i,
+      /(?:answer|resposta)[\s:]*=[\s:]*([A-E])/i // Answer = A format
     ]
 
     let correctOption = 'a' // Default to A if no answer found
@@ -409,6 +500,7 @@ export default function WordImport({ onQuestionsImported }: WordImportProps) {
         const foundOption = match[1].toLowerCase()
         if (['a', 'b', 'c', 'd', 'e'].includes(foundOption)) {
           correctOption = foundOption
+          console.log(`Found correct answer: ${foundOption.toUpperCase()}`)
           break
         }
       }
@@ -437,6 +529,7 @@ export default function WordImport({ onQuestionsImported }: WordImportProps) {
           .substring(0, 1000) // Limit explanation length
         
         if (explanation.length > 10) { // Minimum explanation length
+          console.log(`Found explanation: ${explanation.substring(0, 100)}...`)
           break
         }
       }
@@ -450,7 +543,7 @@ export default function WordImport({ onQuestionsImported }: WordImportProps) {
       }
     })
 
-    console.log('Parsed question:', {
+    console.log('Successfully parsed question:', {
       stem: stem.substring(0, 50) + '...',
       optionsCount: validOptions.length,
       correctOption,
