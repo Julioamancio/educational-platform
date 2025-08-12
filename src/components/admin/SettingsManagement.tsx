@@ -30,23 +30,9 @@ import {
   Monitor
 } from '@phosphor-icons/react'
 import { useKV } from '@github/spark/hooks'
+import { usePlatformSettings } from '@/hooks/usePlatformSettings'
 import { useTheme } from '@/contexts/ThemeContext'
 import { toast } from 'sonner'
-
-interface PlatformSettings {
-  siteName: string
-  siteDescription: string
-  allowRegistration: boolean
-  requireEmailVerification: boolean
-  maxAttemptsPerQuestion: number
-  timeoutMinutes: number
-  showCorrectAnswer: boolean
-  showExplanation: boolean
-  allowReview: boolean
-  defaultDifficulty: string
-  emailNotifications: boolean
-  theme: string
-}
 
 export default function SettingsManagement() {
   const { theme, setTheme } = useTheme()
@@ -55,20 +41,7 @@ export default function SettingsManagement() {
   const [questions] = useKV('questions', [])
   const [attempts, setAttempts] = useKV('attempts', [])
   const [studyLogs, setStudyLogs] = useKV('studyLogs', [])
-  const [settings, setSettings] = useKV('platformSettings', {
-    siteName: 'EduPlatform',
-    siteDescription: 'A comprehensive learning management system',
-    allowRegistration: true,
-    requireEmailVerification: false,
-    maxAttemptsPerQuestion: 3,
-    timeoutMinutes: 30,
-    showCorrectAnswer: true,
-    showExplanation: true,
-    allowReview: true,
-    defaultDifficulty: 'B1',
-    emailNotifications: true,
-    theme: 'light'
-  } as PlatformSettings)
+  const [settings, setSettings] = usePlatformSettings()
 
   const [isLoading, setIsLoading] = useState(false)
   const [showPasswords, setShowPasswords] = useState(false)

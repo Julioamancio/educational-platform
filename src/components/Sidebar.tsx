@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/contexts/AuthContext'
+import { usePlatformSettings } from '@/hooks/usePlatformSettings'
 import { cn } from '@/lib/utils'
 import { 
   House, 
@@ -33,6 +34,7 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
   const { user, logout } = useAuth()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const [settings] = usePlatformSettings()
 
   const adminMenuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: House },
@@ -75,7 +77,7 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
               <GraduationCap size={20} className="text-primary-foreground" weight="bold" />
             </div>
             <span className="font-bold text-lg bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              EduPlatform
+              {settings.siteName}
             </span>
           </div>
         )}

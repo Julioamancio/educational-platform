@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/contexts/AuthContext'
+import { usePlatformSettings } from '@/hooks/usePlatformSettings'
 import { GraduationCap, SignIn, UserPlus, Lightning, Atom, Eye, EyeSlash } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
@@ -12,6 +13,7 @@ export default function LoginPage() {
   const { login, register } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [settings] = usePlatformSettings()
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -63,10 +65,10 @@ export default function LoginPage() {
             </div>
             <div>
               <CardTitle className="text-3xl font-bold gradient-text">
-                EduPlatform
+                {settings.siteName}
               </CardTitle>
               <p className="text-xs text-muted-foreground mt-1">
-                Plataforma de Ensino
+                {settings.siteDescription}
               </p>
             </div>
           </div>
