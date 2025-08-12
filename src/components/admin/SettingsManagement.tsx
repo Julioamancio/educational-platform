@@ -167,24 +167,24 @@ export default function SettingsManagement() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Settings</h1>
+          <h1 className="text-3xl font-bold gradient-text">Configurações</h1>
           <p className="text-muted-foreground">
-            Manage platform configuration and system settings
+            Gerencie a configuração da plataforma e configurações do sistema
           </p>
         </div>
-        <Button onClick={handleSaveSettings} disabled={isLoading}>
+        <Button onClick={handleSaveSettings} disabled={isLoading} className="btn-primary">
           <Save className="h-4 w-4 mr-2" />
-          {isLoading ? 'Saving...' : 'Save Settings'}
+          {isLoading ? 'Salvando...' : 'Salvar Configurações'}
         </Button>
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="learning">Learning</TabsTrigger>
-          <TabsTrigger value="users">Users</TabsTrigger>
-          <TabsTrigger value="system">System</TabsTrigger>
+          <TabsTrigger value="general">Geral</TabsTrigger>
+          <TabsTrigger value="security">Segurança</TabsTrigger>
+          <TabsTrigger value="learning">Aprendizado</TabsTrigger>
+          <TabsTrigger value="users">Usuários</TabsTrigger>
+          <TabsTrigger value="system">Sistema</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general" className="space-y-6">
@@ -437,62 +437,111 @@ export default function SettingsManagement() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                User Management
+                Gerenciamento de Usuários
               </CardTitle>
               <CardDescription>
-                Overview of all users and their information
+                Visualize todos os usuários e suas credenciais de acesso
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <h4 className="font-medium">All Users</h4>
+                  <h4 className="font-medium">Credenciais dos Usuários</h4>
                   <div className="flex items-center gap-2">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setShowPasswords(!showPasswords)}
+                      className="focus-ring"
                     >
-                      {showPasswords ? <EyeSlash className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      {showPasswords ? 'Hide' : 'Show'} Passwords
+                      {showPasswords ? <EyeSlash className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
+                      {showPasswords ? 'Ocultar' : 'Mostrar'} Senhas
                     </Button>
                   </div>
                 </div>
                 
-                <div className="border rounded-lg">
+                <div className="border rounded-lg overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead className="border-b bg-muted/50">
                         <tr>
-                          <th className="text-left p-4">Name</th>
-                          <th className="text-left p-4">Email</th>
-                          <th className="text-left p-4">Role</th>
-                          <th className="text-left p-4">Password</th>
-                          <th className="text-left p-4">Created</th>
+                          <th className="text-left p-4 font-semibold">Nome</th>
+                          <th className="text-left p-4 font-semibold">E-mail</th>
+                          <th className="text-left p-4 font-semibold">Tipo</th>
+                          <th className="text-left p-4 font-semibold">Senha</th>
+                          <th className="text-left p-4 font-semibold">Criado em</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {users.map((user) => (
-                          <tr key={user.id} className="border-b">
+                        {users.length > 0 ? users.map((user, index) => (
+                          <tr key={user.id || index} className="border-b hover:bg-muted/30 transition-colors">
                             <td className="p-4 font-medium">{user.name}</td>
-                            <td className="p-4">{user.email}</td>
+                            <td className="p-4 text-sm">{user.email}</td>
                             <td className="p-4">
-                              <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
-                                {user.role}
+                              <Badge 
+                                variant={user.role === 'admin' ? 'default' : 'secondary'}
+                                className="capitalize"
+                              >
+                                {user.role === 'admin' ? 'Administrador' : 'Estudante'}
                               </Badge>
                             </td>
-                            <td className="p-4 font-mono text-sm">
-                              {showPasswords ? user.password : '••••••••'}
+                            <td className="p-4">
+                              <div className="flex items-center gap-2">
+                                <code className="bg-muted px-2 py-1 rounded text-sm font-mono">
+                                  {showPasswords ? user.password : '••••••••'}
+                                </code>
+                                {showPasswords && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(user.password)
+                                      toast.success('Senha copiada!')
+                                    }}
+                                    className="h-8 w-8 p-0"
+                                  >
+                                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                    </svg>
+                                  </Button>
+                                )}
+                              </div>
                             </td>
                             <td className="p-4 text-sm text-muted-foreground">
-                              {new Date(user.createdAt).toLocaleDateString()}
+                              {user.createdAt ? new Date(user.createdAt).toLocaleDateString('pt-BR') : 'N/A'}
                             </td>
                           </tr>
-                        ))}
+                        )) : (
+                          <tr>
+                            <td colSpan={5} className="p-8 text-center text-muted-foreground">
+                              <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                              <p>Nenhum usuário encontrado</p>
+                              <p className="text-sm">Usuários aparecerão aqui quando forem criados</p>
+                            </td>
+                          </tr>
+                        )}
                       </tbody>
                     </table>
                   </div>
                 </div>
+
+                {users.filter(u => u.role === 'admin').length > 0 && (
+                  <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <Shield className="h-5 w-5 text-amber-600 mt-0.5" />
+                      <div>
+                        <h5 className="font-medium text-amber-800">Informações de Segurança</h5>
+                        <p className="text-sm text-amber-700 mt-1">
+                          As credenciais dos administradores são exibidas apenas para fins de gerenciamento.
+                          Mantenha essas informações seguras e compartilhe apenas com pessoal autorizado.
+                        </p>
+                        <p className="text-xs text-amber-600 mt-2">
+                          Recomenda-se que os administradores alterem suas senhas periodicamente.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
