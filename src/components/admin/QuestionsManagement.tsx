@@ -16,6 +16,7 @@ import { toast } from 'sonner'
 import MediaUpload from '@/components/MediaUpload'
 import WordImport from '@/components/admin/WordImport'
 import SampleDocuments from '@/components/admin/SampleDocuments'
+import ImportTest from '@/components/admin/ImportTest'
 
 export default function QuestionsManagement() {
   const [topics] = useKV<Topic[]>('topics', [])
@@ -483,6 +484,7 @@ export default function QuestionsManagement() {
         </TabsContent>
 
         <TabsContent value="test" className="space-y-6">
+          <ImportTest />
           <SampleDocuments />
         </TabsContent>
       </Tabs>
