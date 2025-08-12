@@ -19,7 +19,9 @@ import {
   GraduationCap,
   Atom,
   Lightning,
-  List
+  List,
+  Key,
+  X
 } from '@phosphor-icons/react'
 
 interface SidebarProps {
@@ -39,6 +41,7 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
     { id: 'questions', label: 'Questões', icon: Question },
     { id: 'users', label: 'Usuários', icon: Users },
     { id: 'reports', label: 'Relatórios', icon: ChartBar },
+    { id: 'credentials', label: 'Credenciais', icon: Key },
     { id: 'settings', label: 'Configurações', icon: Gear },
   ]
 
