@@ -6,7 +6,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useKV } from '@github/spark/hooks'
 import { useAuth } from '@/contexts/AuthContext'
 import { Topic, Question, Attempt } from '@/types'
-import { Brain, CheckCircle, X, ArrowLeft, ArrowRight, RotateCcw, Target, Lightbulb } from '@phosphor-icons/react'
+import { Brain, CheckCircle, X, ArrowLeft, ArrowRight, RotateCcw, Target, Lightbulb, Question as QuestionIcon } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 interface PracticeViewProps {
