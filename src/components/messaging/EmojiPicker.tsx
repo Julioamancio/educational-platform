@@ -66,18 +66,18 @@ const EmojiPicker = ({ onEmojiSelect }: EmojiPickerProps) => {
   }
 
   return (
-    <Card className="w-80 shadow-lg border-border/50">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm">Selecionar Emoji</CardTitle>
+    <Card className="w-96 shadow-xl border-border/50 bg-card/95 backdrop-blur-md">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base font-semibold">Selecionar Emoji</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         <Tabs value={activeCategory} onValueChange={setActiveCategory}>
-          <TabsList className="grid grid-cols-6 w-full h-auto p-1">
+          <TabsList className="grid grid-cols-6 w-full h-auto p-2 bg-muted/30">
             {Object.entries(emojiCategories).map(([key, category]) => (
               <TabsTrigger 
                 key={key} 
                 value={key}
-                className="p-2 text-lg"
+                className="p-3 text-xl rounded-lg transition-all duration-200"
                 title={category.name}
               >
                 {category.emojis[0]}
@@ -86,15 +86,15 @@ const EmojiPicker = ({ onEmojiSelect }: EmojiPickerProps) => {
           </TabsList>
           
           {Object.entries(emojiCategories).map(([key, category]) => (
-            <TabsContent key={key} value={key} className="mt-2">
-              <ScrollArea className="h-40 px-3">
-                <div className="grid grid-cols-8 gap-1 pb-3">
+            <TabsContent key={key} value={key} className="mt-3">
+              <ScrollArea className="h-48 px-4">
+                <div className="grid grid-cols-8 gap-2 pb-4">
                   {category.emojis.map((emoji, index) => (
                     <Button
                       key={index}
                       variant="ghost"
                       size="sm"
-                      className="p-1 h-8 w-8 text-lg hover:bg-muted/50"
+                      className="p-2 h-10 w-10 text-xl hover:bg-muted/50 hover:scale-110 transition-all duration-200 rounded-lg"
                       onClick={() => onEmojiSelect(emoji)}
                       title={emoji}
                     >
