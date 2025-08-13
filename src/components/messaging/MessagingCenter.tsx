@@ -51,6 +51,15 @@ const MessagingCenter = () => {
     scrollToBottom()
   }, [messages])
 
+  // Auto-mark messages as read when viewing a conversation
+  useEffect(() => {
+    if (activeTab === 'global') {
+      markAsRead('global')
+    } else if (activeTab === 'private' && selectedUser) {
+      markAsRead('private', selectedUser)
+    }
+  }, [activeTab, selectedUser])
+
   // Filter messages based on current view
   const getFilteredMessages = () => {
     if (activeTab === 'global') {
@@ -141,9 +150,9 @@ const MessagingCenter = () => {
       })
       await setUnreadCounts(newUnreadCounts)
     } else if (selectedUser) {
-      // Update private chat unread
-      const key = `private-${user.id}-${selectedUser}`
+      // Update private chat unread for the recipient
       const newUnreadCounts = { ...unreadCounts }
+      const key = `private-${selectedUser}-${user.id}`
       newUnreadCounts[key] = (newUnreadCounts[key] || 0) + 1
       await setUnreadCounts(newUnreadCounts)
     }
@@ -154,12 +163,21 @@ const MessagingCenter = () => {
   const markAsRead = async (roomType: string, roomId?: string) => {
     if (!user) return
     
-    const key = roomType === 'global' 
-      ? `global-${user.id}`
-      : `private-${roomId}-${user.id}`
-    
     const newUnreadCounts = { ...unreadCounts }
-    newUnreadCounts[key] = 0
+    
+    if (roomType === 'global') {
+      const key = `global-${user.id}`
+      newUnreadCounts[key] = 0
+    } else if (roomId) {
+      // For private messages, use the correct key format
+      const key1 = `private-${user.id}-${roomId}`
+      const key2 = `private-${roomId}-${user.id}`
+      
+      // Clear both possible key formats
+      newUnreadCounts[key1] = 0
+      newUnreadCounts[key2] = 0
+    }
+    
     await setUnreadCounts(newUnreadCounts)
   }
 
@@ -298,7 +316,7 @@ const MessagingCenter = () => {
                   </p>
                 </div>
                 {getStudents().map(student => {
-                  const unreadKey = `private-${user.id}-${student.id}`
+                  const unreadKey = `private-${student.id}-${user.id}`
                   const unreadCount = unreadCounts[unreadKey] || 0
                   const lastMessage = messages
                     .filter(msg => 

@@ -38,7 +38,16 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isMobileOpen, setIsMobileOpen] = useState(false)
   const [settings] = usePlatformSettings()
-  const { totalUnread } = useMessageNotifications()
+  const { totalUnread, markAsRead, clearAllNotifications } = useMessageNotifications()
+
+  const handleViewChange = (view: string) => {
+    // If navigating to messages, clear all notifications
+    if (view === 'messages') {
+      clearAllNotifications()
+    }
+    onViewChange(view)
+    setIsMobileOpen(false)
+  }
 
   const adminMenuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: House },
@@ -153,8 +162,7 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
                     isDesktop && isCollapsed && "justify-center px-0"
                   )}
                   onClick={() => {
-                    onViewChange(item.id)
-                    setIsMobileOpen(false)
+                    handleViewChange(item.id)
                   }}
                 >
                   <Icon 

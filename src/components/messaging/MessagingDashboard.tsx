@@ -45,7 +45,9 @@ const MessagingDashboard = ({ onViewChange }: MessagingDashboardProps) => {
     
     // Private unread
     Object.keys(unreadCounts).forEach(key => {
-      if (key.includes(`-${user.id}`) && key.startsWith('private-')) {
+      // Format: private-{senderId}-{receiverId}
+      // We want to count messages where the current user is the receiver
+      if (key.startsWith('private-') && key.endsWith(`-${user.id}`)) {
         total += unreadCounts[key] || 0
       }
     })
