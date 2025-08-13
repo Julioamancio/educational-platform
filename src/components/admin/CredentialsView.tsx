@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Label } from '@/components/ui/label'
 import { useKV } from '@github/spark/hooks'
 import { Eye, EyeSlash, Key, User, Copy } from '@phosphor-icons/react'
 import { toast } from 'sonner'
@@ -83,7 +84,7 @@ export default function CredentialsView() {
                       </Label>
                       <div className="flex items-center gap-2">
                         <code className="flex-1 px-3 py-2 bg-muted rounded-md text-sm font-mono">
-                          {showPasswords[user.id] ? user.password : '••••••••'}
+                          {showPasswords[user.id] ? (user.password || 'Não disponível') : '••••••••'}
                         </code>
                         <Button
                           size="sm"
@@ -95,7 +96,7 @@ export default function CredentialsView() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => copyToClipboard(user.password, 'Senha')}
+                          onClick={() => copyToClipboard(user.password || 'Não disponível', 'Senha')}
                         >
                           <Copy size={14} />
                         </Button>
@@ -158,7 +159,7 @@ export default function CredentialsView() {
                       </Label>
                       <div className="flex items-center gap-2">
                         <code className="flex-1 px-3 py-2 bg-muted rounded-md text-sm font-mono">
-                          {showPasswords[user.id] ? user.password : '••••••••'}
+                          {showPasswords[user.id] ? (user.password || 'Não disponível') : '••••••••'}
                         </code>
                         <Button
                           size="sm"
@@ -170,7 +171,7 @@ export default function CredentialsView() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => copyToClipboard(user.password, 'Senha')}
+                          onClick={() => copyToClipboard(user.password || 'Não disponível', 'Senha')}
                         >
                           <Copy size={14} />
                         </Button>
@@ -192,28 +193,30 @@ export default function CredentialsView() {
               <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
             </div>
             <div>
-              <h4 className="font-medium text-blue-900 mb-1">Credenciais Padrão</h4>
-              <p className="text-blue-700 text-sm">
-                As credenciais padrão do sistema são:
+              <h4 className="font-medium text-blue-900 mb-1">Credenciais Padrão do Sistema</h4>
+              <p className="text-blue-700 text-sm mb-3">
+                Para acessar o sistema, utilize as credenciais abaixo:
               </p>
-              <div className="mt-2 space-y-1 text-sm">
-                <div><strong>Admin:</strong> admin@demo.com / Admin@123</div>
-                <div><strong>Estudante:</strong> ana@demo.com / Aluno@123</div>
-                <div><strong>Estudante:</strong> joao@demo.com / Aluno@123</div>
+              <div className="space-y-2 text-sm">
+                <div className="bg-white/70 p-3 rounded border border-blue-200">
+                  <strong className="text-blue-900">Administrador:</strong>
+                  <div className="mt-1 font-mono text-blue-800">
+                    <div>Email: admin@eduplatform.com</div>
+                    <div>Senha: admin123</div>
+                  </div>
+                </div>
+                <div className="bg-white/70 p-3 rounded border border-blue-200">
+                  <strong className="text-blue-900">Estudante:</strong>
+                  <div className="mt-1 font-mono text-blue-800">
+                    <div>Email: ana@example.com</div>
+                    <div>Senha: student123</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
     </div>
-  )
-}
-
-// Label component
-function Label({ className, children, ...props }: { className?: string; children: React.ReactNode }) {
-  return (
-    <label className={`text-sm font-medium ${className}`} {...props}>
-      {children}
-    </label>
   )
 }
