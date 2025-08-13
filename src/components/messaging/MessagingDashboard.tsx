@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -7,7 +6,6 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { ChatMessage, User } from '@/types'
 import { MessageCircle, Send, Users } from '@phosphor-icons/react'
-import MessagingCenter from './MessagingCenter'
 
 interface MessagingDashboardProps {
   onViewChange?: (view: string, data?: any) => void
@@ -18,7 +16,6 @@ const MessagingDashboard = ({ onViewChange }: MessagingDashboardProps) => {
   const [messages, setMessages] = useKV<ChatMessage[]>('chat-messages', [])
   const [users, setUsers] = useKV<User[]>('users', [])
   const [unreadCounts, setUnreadCounts] = useKV<Record<string, number>>('message-unread-counts', {})
-  const [showFullMessaging, setShowFullMessaging] = useState(false)
 
   if (!user) return null
 
@@ -69,29 +66,6 @@ const MessagingDashboard = ({ onViewChange }: MessagingDashboardProps) => {
     }
   }
 
-  if (showFullMessaging) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Centro de Mensagens</h1>
-            <p className="text-muted-foreground">
-              Converse em tempo real com {user.role === 'admin' ? 'alunos' : 'administradores'}
-            </p>
-          </div>
-          <Button 
-            variant="outline"
-            onClick={() => setShowFullMessaging(false)}
-          >
-            Voltar ao Dashboard
-          </Button>
-        </div>
-        
-        <MessagingCenter />
-      </div>
-    )
-  }
-
   const recentMessages = getRecentMessages()
   const totalUnread = getTotalUnreadCount()
 
@@ -111,7 +85,7 @@ const MessagingDashboard = ({ onViewChange }: MessagingDashboardProps) => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setShowFullMessaging(true)}
+            onClick={() => onViewChange?.('messages')}
           >
             Ver Todas
           </Button>
@@ -133,7 +107,7 @@ const MessagingDashboard = ({ onViewChange }: MessagingDashboardProps) => {
               variant="outline" 
               size="sm" 
               className="mt-3"
-              onClick={() => setShowFullMessaging(true)}
+              onClick={() => onViewChange?.('messages')}
             >
               <Send className="w-4 h-4 mr-2" />
               Iniciar Conversa
@@ -151,7 +125,7 @@ const MessagingDashboard = ({ onViewChange }: MessagingDashboardProps) => {
                 <div
                   key={message.id}
                   className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
-                  onClick={() => setShowFullMessaging(true)}
+                  onClick={() => onViewChange?.('messages')}
                 >
                   <Avatar className="w-8 h-8 shrink-0">
                     <AvatarFallback className="bg-secondary text-secondary-foreground text-xs">
@@ -199,7 +173,7 @@ const MessagingDashboard = ({ onViewChange }: MessagingDashboardProps) => {
                 variant="outline" 
                 size="sm" 
                 className="w-full"
-                onClick={() => setShowFullMessaging(true)}
+                onClick={() => onViewChange?.('messages')}
               >
                 <MessageCircle className="w-4 h-4 mr-2" />
                 Abrir Centro de Mensagens
