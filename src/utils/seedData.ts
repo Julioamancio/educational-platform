@@ -4,7 +4,8 @@ export const seedUsers: User[] = [
   {
     id: '1',
     name: 'Admin User',
-    email: 'admin@demo.com',
+    email: 'admin@eduplatform.com',
+    password: 'admin123',
     role: 'admin',
     createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
     lastLogin: new Date().toISOString()
@@ -12,7 +13,8 @@ export const seedUsers: User[] = [
   {
     id: '2',
     name: 'Ana Silva',
-    email: 'student@demo.com',
+    email: 'ana@example.com',
+    password: 'student123',
     role: 'student',
     createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
     lastLogin: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
@@ -20,7 +22,8 @@ export const seedUsers: User[] = [
   {
     id: '3',
     name: 'João Santos',
-    email: 'joao@demo.com',
+    email: 'joao@example.com',
+    password: 'student123',
     role: 'student',
     createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
     lastLogin: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
@@ -28,7 +31,8 @@ export const seedUsers: User[] = [
   {
     id: '4',
     name: 'Maria Oliveira',
-    email: 'maria@demo.com',
+    email: 'maria@example.com',
+    password: 'student123',
     role: 'student',
     createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     lastLogin: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
@@ -36,7 +40,8 @@ export const seedUsers: User[] = [
   {
     id: '5',
     name: 'Pedro Costa',
-    email: 'pedro@demo.com',
+    email: 'pedro@example.com',
+    password: 'student123',
     role: 'student',
     createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
     lastLogin: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
@@ -44,7 +49,8 @@ export const seedUsers: User[] = [
   {
     id: '6',
     name: 'Sofia Ferreira',
-    email: 'sofia@demo.com',
+    email: 'sofia@example.com',
+    password: 'student123',
     role: 'student',
     createdAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString()
   }

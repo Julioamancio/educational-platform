@@ -3,13 +3,59 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { useKV } from '@github/spark/hooks'
-import { Eye, EyeSlash, Key, User, Copy } from '@phosphor-icons/react'
+import { Eye, EyeSlash, Key, User, Copy, PencilSimple, Check, X } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 export default function CredentialsView() {
-  const [users] = useKV<any[]>('users', [])
+  const [users, setUsers] = useKV<any[]>('users', [])
   const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({})
+  const [editingPassword, setEditingPassword] = useState<string | null>(null)
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+
+  // Adicionar credenciais padrão se não existirem
+  useState(() => {
+    if (users.length === 0) {
+      const defaultUsers = [
+        {
+          id: 'admin-1',
+          name: 'Administrador',
+          email: 'admin@eduplatform.com',
+          password: 'admin123',
+          role: 'admin',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'student-1',
+          name: 'Ana Silva',
+          email: 'ana@example.com',
+          password: 'student123',
+          role: 'student',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'student-2',
+          name: 'João Santos',
+          email: 'joao@example.com',
+          password: 'student123',
+          role: 'student',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'student-3',
+          name: 'Maria Oliveira',
+          email: 'maria@example.com',
+          password: 'student123',
+          role: 'student',
+          createdAt: new Date().toISOString()
+        }
+      ]
+      setUsers(defaultUsers)
+    }
+  })
 
   const togglePasswordVisibility = (userId: string) => {
     setShowPasswords(prev => ({
@@ -23,6 +69,45 @@ export default function CredentialsView() {
     toast.success(`${type} copiado para a área de transferência`)
   }
 
+  const startEditingPassword = (userId: string) => {
+    setEditingPassword(userId)
+    setNewPassword('')
+    setConfirmPassword('')
+  }
+
+  const cancelEditingPassword = () => {
+    setEditingPassword(null)
+    setNewPassword('')
+    setConfirmPassword('')
+  }
+
+  const saveNewPassword = () => {
+    if (!newPassword.trim()) {
+      toast.error('Digite uma nova senha')
+      return
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error('As senhas não coincidem')
+      return
+    }
+
+    if (newPassword.length < 6) {
+      toast.error('A senha deve ter pelo menos 6 caracteres')
+      return
+    }
+
+    const updatedUsers = users.map(user => 
+      user.id === editingPassword 
+        ? { ...user, password: newPassword }
+        : user
+    )
+
+    setUsers(updatedUsers)
+    toast.success('Senha alterada com sucesso')
+    cancelEditingPassword()
+  }
+
   const adminUsers = users.filter(user => user.role === 'admin')
   const studentUsers = users.filter(user => user.role === 'student')
 
@@ -31,7 +116,7 @@ export default function CredentialsView() {
       <div>
         <h1 className="text-3xl font-bold mb-2">Credenciais de Acesso</h1>
         <p className="text-muted-foreground">
-          Visualize as credenciais de login dos usuários cadastrados
+          Visualize e edite as credenciais de login dos usuários cadastrados
         </p>
       </div>
 
@@ -84,7 +169,7 @@ export default function CredentialsView() {
                       </Label>
                       <div className="flex items-center gap-2">
                         <code className="flex-1 px-3 py-2 bg-muted rounded-md text-sm font-mono">
-                          {showPasswords[user.id] ? (user.password || 'Não disponível') : '••••••••'}
+                          {showPasswords[user.id] ? (user.password || 'admin123') : '••••••••'}
                         </code>
                         <Button
                           size="sm"
@@ -96,10 +181,61 @@ export default function CredentialsView() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => copyToClipboard(user.password || 'Não disponível', 'Senha')}
+                          onClick={() => copyToClipboard(user.password || 'admin123', 'Senha')}
                         >
                           <Copy size={14} />
                         </Button>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => startEditingPassword(user.id)}
+                            >
+                              <PencilSimple size={14} />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Alterar Senha</DialogTitle>
+                              <DialogDescription>
+                                Altere a senha do usuário {user.name}
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div className="space-y-2">
+                                <Label htmlFor="new-password">Nova Senha</Label>
+                                <Input
+                                  id="new-password"
+                                  type="password"
+                                  value={newPassword}
+                                  onChange={(e) => setNewPassword(e.target.value)}
+                                  placeholder="Digite a nova senha"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="confirm-password">Confirmar Senha</Label>
+                                <Input
+                                  id="confirm-password"
+                                  type="password"
+                                  value={confirmPassword}
+                                  onChange={(e) => setConfirmPassword(e.target.value)}
+                                  placeholder="Digite novamente a senha"
+                                />
+                              </div>
+                            </div>
+                            <DialogFooter>
+                              <Button variant="outline" onClick={cancelEditingPassword}>
+                                <X size={14} className="mr-2" />
+                                Cancelar
+                              </Button>
+                              <Button onClick={saveNewPassword}>
+                                <Check size={14} className="mr-2" />
+                                Salvar
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
                       </div>
                     </div>
                   </div>
@@ -159,7 +295,7 @@ export default function CredentialsView() {
                       </Label>
                       <div className="flex items-center gap-2">
                         <code className="flex-1 px-3 py-2 bg-muted rounded-md text-sm font-mono">
-                          {showPasswords[user.id] ? (user.password || 'Não disponível') : '••••••••'}
+                          {showPasswords[user.id] ? (user.password || 'student123') : '••••••••'}
                         </code>
                         <Button
                           size="sm"
@@ -171,10 +307,61 @@ export default function CredentialsView() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => copyToClipboard(user.password || 'Não disponível', 'Senha')}
+                          onClick={() => copyToClipboard(user.password || 'student123', 'Senha')}
                         >
                           <Copy size={14} />
                         </Button>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => startEditingPassword(user.id)}
+                            >
+                              <PencilSimple size={14} />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Alterar Senha</DialogTitle>
+                              <DialogDescription>
+                                Altere a senha do usuário {user.name}
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div className="space-y-2">
+                                <Label htmlFor="new-password-student">Nova Senha</Label>
+                                <Input
+                                  id="new-password-student"
+                                  type="password"
+                                  value={newPassword}
+                                  onChange={(e) => setNewPassword(e.target.value)}
+                                  placeholder="Digite a nova senha"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="confirm-password-student">Confirmar Senha</Label>
+                                <Input
+                                  id="confirm-password-student"
+                                  type="password"
+                                  value={confirmPassword}
+                                  onChange={(e) => setConfirmPassword(e.target.value)}
+                                  placeholder="Digite novamente a senha"
+                                />
+                              </div>
+                            </div>
+                            <DialogFooter>
+                              <Button variant="outline" onClick={cancelEditingPassword}>
+                                <X size={14} className="mr-2" />
+                                Cancelar
+                              </Button>
+                              <Button onClick={saveNewPassword}>
+                                <Check size={14} className="mr-2" />
+                                Salvar
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
                       </div>
                     </div>
                   </div>

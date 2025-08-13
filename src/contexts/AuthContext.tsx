@@ -56,13 +56,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const foundUser = users.find(u => u.email === email)
       if (foundUser) {
-        // Admin credentials
-        if (foundUser.email === 'admin@demo.com' && password === 'admin123') {
+        // Check if the provided password matches the stored password
+        if (foundUser.password && foundUser.password === password) {
           setCurrentUserId(foundUser.id)
           setUser(foundUser)
           return true
         }
-        // Student credentials  
+        // Fallback for admin credentials
+        if (foundUser.email === 'admin@eduplatform.com' && password === 'admin123') {
+          setCurrentUserId(foundUser.id)
+          setUser(foundUser)
+          return true
+        }
+        // Fallback for student credentials  
         if (foundUser.role === 'student' && password === 'student123') {
           setCurrentUserId(foundUser.id)
           setUser(foundUser)
