@@ -1,177 +1,158 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, Car
 import { Badge } from '@/components/ui/badge'
-import { useAuth } from '@/contexts/AuthContext'
-import { useKV } from '@github/spark/hooks'
+  BookOpen, om '@/contexts/AuthContext'
 import { toast } from 'sonner'
-import { 
-  ArrowLeft, 
   ArrowRight, 
-  CheckCircle, 
+  ArrowLeft, 
   Clock, 
-  PlayCircle,
+  CheckCircle, 
   Image as ImageIcon,
+  PlayCircle,
+  const [c
   BookOpen
-} from '@phosphor-icons/react'
+    ? contents.filter(c => c.t
 import { Topic, Content } from '@/types'
 
-interface StudyViewProps {
+      const index 
   topicId?: string
-  contentId?: string
+    }
   onBack: () => void
-  onViewChange: (view: string, data?: any) => void
-}
+ string, data?: any) => void
 
-export default function StudyView({ topicId, contentId, onBack, onViewChange }: StudyViewProps) {
+    if (currentContent && user) {
+        log.userId === user.dyViewProps) {
   const { user } = useAuth()
   const [topics] = useKV<Topic[]>('topics', [])
-  const [contents] = useKV<Content[]>('contents', [])
+  }, [currentContent, user, studyLogs])
   const [studyLogs, setStudyLogs] = useKV<any[]>('study_logs', [])
-  const [currentContentIndex, setCurrentContentIndex] = useState(0)
-  const [loading, setLoading] = useState(false)
+t [currentContentIndex, setCurrentContentIndex] = useState(0)
+      log.userId === user.id && log.contentId === curre
 
-  const currentTopic = topics.find(t => t.id === topicId)
   const topicContents = contents.filter(c => c.topicId === topicId && c.isPublished)
-  const currentContent = contentId 
+        currentLogs.map(log => 
     ? contents.find(c => c.id === contentId)
     : topicContents[currentContentIndex]
-
-  useEffect(() => {
-    if (contentId) {
-      const index = topicContents.findIndex(c => c.id === contentId)
+    } else {
+      const newLog:
+        userId: user
       if (index !== -1) {
-        setCurrentContentIndex(index)
       }
-    }
+      }
+    set
   }, [contentId, topicContents])
 
   const markAsStudied = async () => {
     if (!currentContent || !user) return
 
-    setLoading(true)
-    try {
+
+    if (currentContentIndex > 0) {
       const existingLog = studyLogs.find(
         log => log.userId === user.id && log.contentId === currentContent.id
       )
 
-      if (!existingLog) {
         const newLog = {
-          id: Date.now().toString(),
+    ).length
           userId: user.id,
           contentId: currentContent.id,
-          markedDone: true,
-          createdAt: new Date().toISOString()
-        }
+    }     markedDone: true,
+te().toISOString()
 
+        <div className="flex items-ce
         setStudyLogs(currentLogs => [...currentLogs, newLog])
         toast.success('Conteúdo marcado como estudado!')
-      }
     } catch (error) {
       toast.error('Erro ao marcar conteúdo como estudado')
     } finally {
-      setLoading(false)
-    }
+ setLoading(false)
+          <CardContent
   }
 
   const isStudied = studyLogs.some(
     log => log.userId === user?.id && log.contentId === currentContent?.id && log.markedDone
   )
-
-  const navigateToNext = () => {
-    if (currentContentIndex < topicContents.length - 1) {
+            </But
+        <
       setCurrentContentIndex(prev => prev + 1)
     }
-  }
+
 
   const navigateToPrevious = () => {
     if (currentContentIndex > 0) {
-      setCurrentContentIndex(prev => prev - 1)
     }
-  }
+          <p className="t
 
-  const goToPractice = () => {
+       
     onViewChange('practice', { topicId })
-  }
 
-  if (!currentContent) {
+
     return (
       <div className="max-w-4xl mx-auto p-6">
-        <Button onClick={onBack} variant="ghost" className="mb-6">
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Voltar
-        </Button>
+
+            <span>{progress.percent
         <Card>
-          <CardContent className="text-center py-8">
             <BookOpen className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
             <h3 className="text-lg font-semibold mb-2">Nenhum conteúdo encontrado</h3>
             <p className="text-muted-foreground">
-              Não há conteúdos disponíveis para este tópico.
+            <d
             </p>
           </CardContent>
-        </Card>
-      </div>
-    )
-  }
 
-  const progress = topicContents.length > 0 ? ((currentContentIndex + 1) / topicContents.length) * 100 : 0
+    )
+          </div>
+
 
   return (
     <div className="max-w-4xl mx-auto p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <Button onClick={onBack} variant="ghost">
-          <ArrowLeft className="w-4 h-4 mr-2" />
+    ariant="ghost">
+                <div className="relative">
           Voltar para {currentTopic?.name}
         </Button>
         <div className="flex items-center gap-4">
-          <Badge variant="secondary">
             {currentContentIndex + 1} de {topicContents.length}
-          </Badge>
-          <Button onClick={goToPractice} variant="outline">
-            Praticar questões
-          </Button>
-        </div>
-      </div>
 
-      {/* Progress */}
+          <Button onClick={goToPractice} variant="outline">
+          </Button>
+                    alt={currentConten
+      </div>
+     
       <div className="mb-6">
-        <div className="flex items-center justify-between mb-2">
+ <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium">Progresso do estudo</span>
           <span className="text-sm text-muted-foreground">{Math.round(progress)}%</span>
         </div>
         <Progress value={progress} className="h-2" />
       </div>
 
-      {/* Content */}
+              disa
       <Card className="mb-6">
-        <CardHeader>
           <div className="flex items-start justify-between">
             <div>
-              <CardTitle className="text-2xl mb-2">{currentContent.title}</CardTitle>
+              ) : ({currentContent.title}</CardTitle>
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
+                
                   <Clock className="w-4 h-4" />
                   {currentContent.estimatedTimeMin} min
-                </div>
+ </div>
                 {currentContent.tags && currentContent.tags.length > 0 && (
-                  <div className="flex gap-1">
                     {currentContent.tags.map((tag, index) => (
                       <Badge key={index} variant="outline" className="text-xs">
                         {tag}
-                      </Badge>
+              variant="outline" 
                     ))}
                   </div>
-                )}
               </div>
-            </div>
+            <sp
             {isStudied && (
-              <Badge className="bg-green-100 text-green-800 border-green-200">
                 <CheckCircle className="w-3 h-3 mr-1" />
-                Estudado
-              </Badge>
-            )}
+            >   Estudado
+                <>
+                  <Ar
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
