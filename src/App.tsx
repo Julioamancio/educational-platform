@@ -16,6 +16,7 @@ import CredentialsView from '@/components/admin/CredentialsView'
 import TopicsView from '@/components/student/TopicsView'
 import PracticeView from '@/components/student/PracticeView'
 import StudyView from '@/components/student/StudyView'
+import AllContentsView from '@/components/student/AllContentsView'
 import ReviewView from '@/components/student/ReviewView'
 import ProgressView from '@/components/student/ProgressView'
 
@@ -75,12 +76,17 @@ function AppContent() {
         ) : null
       case 'study':
         return user.role === 'student' ? (
-          <StudyView 
-            topicId={viewData?.topicId}
-            contentId={viewData?.contentId}
-            onBack={() => setCurrentView('topics')}
-            onViewChange={handleViewChange}
-          />
+          // If no specific topic is selected, show all contents for studying
+          viewData?.topicId ? (
+            <StudyView 
+              topicId={viewData.topicId}
+              contentId={viewData?.contentId}
+              onBack={() => setCurrentView('topics')}
+              onViewChange={handleViewChange}
+            />
+          ) : (
+            <AllContentsView onViewChange={handleViewChange} />
+          )
         ) : null
       case 'review':
         return user.role === 'student' ? (

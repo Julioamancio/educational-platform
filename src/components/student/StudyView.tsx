@@ -29,7 +29,7 @@ interface Content {
   title: string
   bodyHtml: string
   mediaUrl?: string
-  estimatedTimeMin: number
+  estTimeMin: number
   tags: string[]
   isPublished: boolean
 }
@@ -169,7 +169,7 @@ export default function StudyView({ topicId, contentId, onBack, onViewChange }: 
               <div className="flex items-center gap-2 mb-2">
                 <Badge variant="secondary">
                   <Clock className="w-3 h-3 mr-1" />
-                  {currentContent.estimatedTimeMin} min
+                  {currentContent.estTimeMin} min
                 </Badge>
                 {currentContent.tags.map(tag => (
                   <Badge key={tag} variant="outline">{tag}</Badge>
