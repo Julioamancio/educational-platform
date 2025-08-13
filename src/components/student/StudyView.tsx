@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { 
-  ArrowLeft, 
   Clock, 
+  ArrowLeft, 
+  PlayCir
   CheckCircle, 
   Image as ImageIcon,
   PlayCircle,
@@ -12,30 +12,30 @@ import {
 } from '@phosphor-icons/react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useKV } from '@github/spark/hooks'
-import { toast } from 'sonner'
-import { Topic, Content } from '@/types'
-
-interface StudyViewProps {
-  topicId?: string
-  contentId?: string
-
-  onViewChange: (view: string, data?: any) => void
- 
-
-export default function StudyView({ topicId, contentId, onBack, onViewChange }: StudyViewProps) {
-  const { user } = useAuth()
           </p>
   const [contents] = useKV<Content[]>('contents', [])
   const [studyLogs, setStudyLogs] = useKV<any[]>('study_logs', [])
-  const [currentContentIndex, setCurrentContentIndex] = useState(0)
+interface StudyViewProps {x] = useState(0)
                       <Badge variant="outline" 
 
-                    <CardDescription className="text-sm l
-                    </CardDescription>
+               <CardDescription className="text-sm l
+  onViewChange: (view: string, data?: any) => void
   
                       {/* Progress 
                         <div className="flex
                           <span classNam
+
+
+                   
+                    
+                        </span>
+                         
+                        </span>
+
+     
+                        classNam
+                        <div className="flex
+                          'Sem conteú
 
 
                    
@@ -62,18 +62,6 @@ export default function StudyView({ topicId, contentId, onBack, onViewChange }: 
           </Card>
           contentId: currentContent.id,
           markedDone: true,
-          createdAt: new Date().toISOString()
-        }
-
-        setStudyLogs(currentLogs => [...currentLogs, newLog])
-        toast.success('Conteúdo marcado como estudado!')
-      }
-    } catch (error) {
-      toast.error('Erro ao marcar conteúdo como estudado')
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const isStudied = studyLogs.some(
     log => log.userId === user?.id && log.contentId === currentContent?.id && log.markedDone
