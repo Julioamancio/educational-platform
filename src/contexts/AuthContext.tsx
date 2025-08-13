@@ -55,10 +55,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       const foundUser = users.find(u => u.email === email)
-      if (foundUser && password === 'demo123') { // Simple demo password
-        setCurrentUserId(foundUser.id)
-        setUser(foundUser)
-        return true
+      if (foundUser) {
+        // Admin credentials
+        if (foundUser.email === 'admin@eduplatform.com' && password === 'admin123') {
+          setCurrentUserId(foundUser.id)
+          setUser(foundUser)
+          return true
+        }
+        // Student credentials  
+        if (foundUser.role === 'student' && password === 'student123') {
+          setCurrentUserId(foundUser.id)
+          setUser(foundUser)
+          return true
+        }
       }
       return false
     } catch (error) {
