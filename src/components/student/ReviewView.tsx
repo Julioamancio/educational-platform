@@ -14,10 +14,10 @@ import {
   Clock, 
   Target, 
   TrendDown, 
-  Search,
-  Filter,
+  MagnifyingGlass,
+  FunnelSimple,
   Eye,
-  RefreshCw
+  ArrowClockwise
 } from '@phosphor-icons/react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -191,7 +191,7 @@ export default function ReviewView({ onBack, onViewChange }: ReviewViewProps) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Filter className="w-5 h-5" />
+            <FunnelSimple className="w-5 h-5" />
             Filtros
           </CardTitle>
         </CardHeader>
@@ -199,7 +199,7 @@ export default function ReviewView({ onBack, onViewChange }: ReviewViewProps) {
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   placeholder="Buscar por título, tópico ou tag..."
                   value={searchTerm}
@@ -326,7 +326,7 @@ export default function ReviewView({ onBack, onViewChange }: ReviewViewProps) {
                       size="sm"
                       onClick={() => handleRetryQuestion(attempt.question.id)}
                     >
-                      <RefreshCw className="w-4 h-4 mr-2" />
+                      <ArrowClockwise className="w-4 h-4 mr-2" />
                       Tentar novamente
                     </Button>
                   </div>
@@ -385,7 +385,7 @@ export default function ReviewView({ onBack, onViewChange }: ReviewViewProps) {
                     handleRetryQuestion(selectedAttempt.question.id)
                   }}
                 >
-                  <RefreshCw className="w-4 h-4 mr-2" />
+                  <ArrowClockwise className="w-4 h-4 mr-2" />
                   Tentar novamente
                 </Button>
               </div>
