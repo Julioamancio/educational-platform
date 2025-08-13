@@ -12,7 +12,7 @@ import { User } from '@/types'
 import { Plus, Trash, Users, UserCircle, Check, X, MagnifyingGlass, Funnel, Download, Warning, Shield, Eye, EyeSlash, Copy } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
-export default function StudentsManagement() {
+function StudentsManagement() {
   const [users, setUsers] = useKV<User[]>('users', [])
   const [selectedStudents, setSelectedStudents] = useState<Set<string>>(new Set())
   const [searchTerm, setSearchTerm] = useState('')
@@ -21,6 +21,47 @@ export default function StudentsManagement() {
   const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false)
   const [showPasswords, setShowPasswords] = useState<Set<string>>(new Set())
   const [activeTab, setActiveTab] = useState('students')
+
+  // Initialize default users if none exist
+  useState(() => {
+    if (users.length === 0) {
+      const defaultUsers: User[] = [
+        {
+          id: 'admin-1',
+          name: 'Administrador',
+          email: 'admin@eduplatform.com',
+          password: 'admin123',
+          role: 'admin',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'student-1',
+          name: 'Ana Silva',
+          email: 'ana@example.com',
+          password: 'student123',
+          role: 'student',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'student-2',
+          name: 'João Santos',
+          email: 'joao@example.com',
+          password: 'student123',
+          role: 'student',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'student-3',
+          name: 'Maria Oliveira',
+          email: 'maria@example.com',
+          password: 'student123',
+          role: 'student',
+          createdAt: new Date().toISOString()
+        }
+      ]
+      setUsers(defaultUsers)
+    }
+  })
 
   // Filter users by role
   const students = users.filter(user => user.role === 'student')
@@ -485,3 +526,5 @@ export default function StudentsManagement() {
     </div>
   )
 }
+
+export default StudentsManagement
