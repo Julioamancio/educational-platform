@@ -4,11 +4,15 @@ import { Progress } from '@/components/ui/progress'
 import { useAuth } from '@/contexts/AuthContext'
 import { useKV } from '@github/spark/hooks'
 import { Topic, Content, Question, Attempt, StudyLog } from '@/types'
-import { Book, Question as QuestionIcon, TrendUp, Users, CheckCircle, GraduationCap, ClockCounterClockwise, Target, Plus, Database, Lightning, Calendar, Trophy, Activity, Sparkle, Note, FileText } from '@phosphor-icons/react'
+import { Book, Question as QuestionIcon, TrendUp, Users, CheckCircle, GraduationCap, ClockCounterClockwise, Target, Plus, Database, Lightning, Calendar, Trophy, Activity, Sparkle, Note } from '@phosphor-icons/react'
 import { initializeSampleData } from '@/lib/sampleData'
 import { toast } from 'sonner'
 
-export default function Dashboard() {
+interface DashboardProps {
+  onViewChange?: (view: string, data?: any) => void
+}
+
+export default function Dashboard({ onViewChange }: DashboardProps) {
   const { user } = useAuth()
   const [topics, setTopics] = useKV<Topic[]>('topics', [])
   const [contents, setContents] = useKV<Content[]>('contents', [])
@@ -313,7 +317,107 @@ export default function Dashboard() {
         </Card>
       </div>
 
+      {/* Quick Actions for Students */}
       <Card className="glass-effect">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Lightning size={20} className="text-primary" weight="fill" />
+            Ações Rápidas
+          </CardTitle>
+          <CardDescription>Acesse rapidamente as principais funcionalidades</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Button
+              variant="outline"
+              className="h-20 flex flex-col gap-2 hover:bg-primary/5 hover:border-primary/50"
+              onClick={() => onViewChange?.('topics')}
+            >
+              <Book size={20} className="text-primary" />
+              <span className="text-sm">Explorar Tópicos</span>
+            </Button>
+            
+            <Button
+              variant="outline"
+              className="h-20 flex flex-col gap-2 hover:bg-secondary/5 hover:border-secondary/50"
+              onClick={() => onViewChange?.('practice')}
+            >
+              <Target size={20} className="text-secondary" />
+              <span className="text-sm">Praticar</span>
+            </Button>
+            
+            <Button
+              variant="outline"
+              className="h-20 flex flex-col gap-2 hover:bg-accent/5 hover:border-accent/50"
+              onClick={() => onViewChange?.('review')}
+            >
+              <ClockCounterClockwise size={20} className="text-accent" />
+              <span className="text-sm">Revisar</span>
+            </Button>
+            
+            <Button
+              variant="outline"
+              className="h-20 flex flex-col gap-2 hover:bg-green-500/5 hover:border-green-500/50"
+              onClick={() => onViewChange?.('progress')}
+            >
+              <TrendUp size={20} className="text-green-600" />
+              <span className="text-sm">Progresso</span>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Recent Activity for Students */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <Card className="glass-effect">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity size={20} className="text-accent" weight="fill" />
+              Atividade Recente
+            </CardTitle>
+            <CardDescription>Suas últimas sessões de estudo e tentativas</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {userAttempts.slice(-5).reverse().map((attempt) => {
+                const question = questions.find(q => q.id === attempt.questionId)
+                const topic = topics.find(t => t.id === question?.topicId)
+                return (
+                  <div key={attempt.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/50">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                        <QuestionIcon size={16} className="text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm">{question?.title || 'Questão'}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {topic?.name || 'Tópico'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      attempt.isCorrect 
+                        ? 'bg-green-100 text-green-800 border border-green-200' 
+                        : 'bg-red-100 text-red-800 border border-red-200'
+                    }`}>
+                      {attempt.isCorrect ? 'Correto' : 'Incorreto'}
+                    </div>
+                  </div>
+                )
+              })}
+              {userAttempts.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Activity size={32} className="mx-auto mb-2 opacity-50" />
+                  <p>Nenhuma tentativa ainda</p>
+                  <p className="text-xs mt-1">Comece a praticar para ver suas atividades aqui</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Progress by Topic - Moved from below */}
+        <Card className="glass-effect">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendUp size={20} className="text-accent" weight="fill" />
@@ -330,12 +434,32 @@ export default function Dashboard() {
                   <span className="text-sm font-medium text-primary">{progress}% completo</span>
                 </div>
                 <Progress value={progress} className="h-3 mb-3" />
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>{topic.description}</span>
-                  <span className="flex items-center gap-1">
-                    <Target size={14} />
-                    {accuracy}% precisão
-                  </span>
+                <div className="flex justify-between items-center">
+                  <div className="text-sm text-muted-foreground">
+                    <span>{topic.description}</span>
+                    <span className="flex items-center gap-1 mt-1">
+                      <Target size={14} />
+                      {accuracy}% precisão
+                    </span>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => onViewChange?.('study', { topicId: topic.id })}
+                    >
+                      <Book size={14} className="mr-1" />
+                      Estudar
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => onViewChange?.('practice', { topicId: topic.id })}
+                    >
+                      <QuestionIcon size={14} className="mr-1" />
+                      Praticar
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -349,6 +473,7 @@ export default function Dashboard() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   )
 }

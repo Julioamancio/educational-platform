@@ -15,6 +15,9 @@ import StudentsManagement from '@/components/admin/StudentsManagement'
 import CredentialsView from '@/components/admin/CredentialsView'
 import TopicsView from '@/components/student/TopicsView'
 import PracticeView from '@/components/student/PracticeView'
+import StudyView from '@/components/student/StudyView'
+import ReviewView from '@/components/student/ReviewView'
+import ProgressView from '@/components/student/ProgressView'
 
 function AppContent() {
   const { user, isLoading } = useAuth()
@@ -44,7 +47,7 @@ function AppContent() {
   const renderMainContent = () => {
     switch (currentView) {
       case 'dashboard':
-        return <Dashboard />
+        return <Dashboard onViewChange={handleViewChange} />
       
       // Admin views
       case 'topics':
@@ -72,24 +75,26 @@ function AppContent() {
         ) : null
       case 'study':
         return user.role === 'student' ? (
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-bold text-muted-foreground mb-4">Conteúdo de Estudo</h2>
-            <p className="text-muted-foreground">Em breve...</p>
-          </div>
+          <StudyView 
+            topicId={viewData?.topicId}
+            contentId={viewData?.contentId}
+            onBack={() => setCurrentView('topics')}
+            onViewChange={handleViewChange}
+          />
         ) : null
       case 'review':
         return user.role === 'student' ? (
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-bold text-muted-foreground mb-4">Revisão</h2>
-            <p className="text-muted-foreground">Em breve...</p>
-          </div>
+          <ReviewView 
+            onBack={() => setCurrentView('dashboard')}
+            onViewChange={handleViewChange}
+          />
         ) : null
       case 'progress':
         return user.role === 'student' ? (
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-bold text-muted-foreground mb-4">Progresso</h2>
-            <p className="text-muted-foreground">Em breve...</p>
-          </div>
+          <ProgressView 
+            onBack={() => setCurrentView('dashboard')}
+            onViewChange={handleViewChange}
+          />
         ) : null
       
       default:

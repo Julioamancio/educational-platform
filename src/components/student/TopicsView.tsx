@@ -6,7 +6,7 @@ import { Progress } from '@/components/ui/progress'
 import { useKV } from '@github/spark/hooks'
 import { useAuth } from '@/contexts/AuthContext'
 import { Topic, Content, Question, StudyLog, Attempt } from '@/types'
-import { BookOpen, Brain, Clock, Play, Target, TrendUp } from '@phosphor-icons/react'
+import { BookOpen, Brain, Clock, Play, Target, TrendUp, Book } from '@phosphor-icons/react'
 
 interface TopicsViewProps {
   onViewChange: (view: string, data?: any) => void
