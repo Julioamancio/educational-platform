@@ -96,7 +96,7 @@ export default function LoginPage() {
                     id="email"
                     name="email"
                     type="email"
-                    defaultValue="admin@eduplatform.com"
+                    defaultValue="admin@demo.com"
                     placeholder="Digite seu e-mail"
                     className="focus-ring"
                     required
@@ -149,7 +149,7 @@ export default function LoginPage() {
                     <div className="space-y-2 text-xs">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Email:</span>
-                        <span className="font-mono text-foreground">admin@eduplatform.com</span>
+                        <span className="font-mono text-foreground">admin@demo.com</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Senha:</span>
@@ -165,7 +165,7 @@ export default function LoginPage() {
                     <div className="space-y-2 text-xs">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Email:</span>
-                        <span className="font-mono text-foreground">ana@example.com</span>
+                        <span className="font-mono text-foreground">student@demo.com</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Senha:</span>

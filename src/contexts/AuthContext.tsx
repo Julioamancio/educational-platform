@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const foundUser = users.find(u => u.email === email)
       if (foundUser) {
         // Admin credentials
-        if (foundUser.email === 'admin@eduplatform.com' && password === 'admin123') {
+        if (foundUser.email === 'admin@demo.com' && password === 'admin123') {
           setCurrentUserId(foundUser.id)
           setUser(foundUser)
           return true
