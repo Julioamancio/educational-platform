@@ -96,7 +96,7 @@ export default function LoginPage() {
                     id="email"
                     name="email"
                     type="email"
-                    defaultValue="admin@demo.com"
+                    defaultValue="admin@eduplatform.com"
                     placeholder="Digite seu e-mail"
                     className="focus-ring"
                     required
@@ -109,7 +109,7 @@ export default function LoginPage() {
                       id="password"
                       name="password"
                       type={showPassword ? "text" : "password"}
-                      defaultValue="demo123"
+                      defaultValue="admin123"
                       placeholder="Digite sua senha"
                       className="focus-ring pr-10"
                       required
@@ -149,11 +149,11 @@ export default function LoginPage() {
                     <div className="space-y-2 text-xs">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Email:</span>
-                        <span className="font-mono text-foreground">admin@demo.com</span>
+                        <span className="font-mono text-foreground">admin@eduplatform.com</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Senha:</span>
-                        <span className="font-mono text-foreground">demo123</span>
+                        <span className="font-mono text-foreground">admin123</span>
                       </div>
                     </div>
                   </div>
@@ -165,11 +165,11 @@ export default function LoginPage() {
                     <div className="space-y-2 text-xs">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Email:</span>
-                        <span className="font-mono text-foreground">student@demo.com</span>
+                        <span className="font-mono text-foreground">ana@example.com</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Senha:</span>
-                        <span className="font-mono text-foreground">demo123</span>
+                        <span className="font-mono text-foreground">student123</span>
                       </div>
                       <p className="text-xs text-muted-foreground mt-2">
                         Ou registre-se para criar uma nova conta de estudante

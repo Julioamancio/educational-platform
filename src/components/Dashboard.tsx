@@ -4,7 +4,7 @@ import { Progress } from '@/components/ui/progress'
 import { useAuth } from '@/contexts/AuthContext'
 import { useKV } from '@github/spark/hooks'
 import { Topic, Content, Question, Attempt, StudyLog } from '@/types'
-import { Book, Question as QuestionIcon, TrendUp, Users, CheckCircle, GraduationCap, ClockCounterClockwise, Target, Plus, Database, Lightning, Calendar, Trophy, Activity, Sparkle, Note } from '@phosphor-icons/react'
+import { Book, Question as QuestionIcon, TrendUp, Users, CheckCircle, GraduationCap, ClockCounterClockwise, Target, Plus, Database, Lightning, Calendar, Trophy, Activity, Sparkle, FileText } from '@phosphor-icons/react'
 import { initializeSampleData } from '@/lib/sampleData'
 import { toast } from 'sonner'
 
@@ -209,7 +209,7 @@ export default function Dashboard({ onViewChange }: DashboardProps) {
                       </div>
                       <div className="flex gap-4 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
-                          <Note size={14} />
+                          <FileText size={14} />
                           {topicContents.length} conteúdos
                         </span>
                         <span className="flex items-center gap-1">
@@ -331,7 +331,17 @@ export default function Dashboard({ onViewChange }: DashboardProps) {
             <Button
               variant="outline"
               className="h-20 flex flex-col gap-2 hover:bg-primary/5 hover:border-primary/50"
-              onClick={() => onViewChange?.('topics')}
+              onClick={() => {
+                const availableTopics = topics.filter(t => {
+                  const topicContents = contents.filter(c => c.topicId === t.id && c.isPublished)
+                  return topicContents.length > 0
+                })
+                if (availableTopics.length > 0) {
+                  onViewChange?.('topics')
+                } else {
+                  toast.error('Não há conteúdos disponíveis para estudo')
+                }
+              }}
             >
               <Book size={20} className="text-primary" />
               <span className="text-sm">Explorar Tópicos</span>
@@ -340,7 +350,14 @@ export default function Dashboard({ onViewChange }: DashboardProps) {
             <Button
               variant="outline"
               className="h-20 flex flex-col gap-2 hover:bg-secondary/5 hover:border-secondary/50"
-              onClick={() => onViewChange?.('practice')}
+              onClick={() => {
+                const availableQuestions = questions.filter(q => q.isPublished)
+                if (availableQuestions.length > 0) {
+                  onViewChange?.('practice')
+                } else {
+                  toast.error('Não há questões disponíveis para prática')
+                }
+              }}
             >
               <Target size={20} className="text-secondary" />
               <span className="text-sm">Praticar</span>
@@ -446,7 +463,14 @@ export default function Dashboard({ onViewChange }: DashboardProps) {
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => onViewChange?.('study', { topicId: topic.id })}
+                      onClick={() => {
+                        const topicContents = contents.filter(c => c.topicId === topic.id && c.isPublished)
+                        if (topicContents.length > 0) {
+                          onViewChange?.('study', { topicId: topic.id })
+                        } else {
+                          toast.error('Não há conteúdos disponíveis para estudo neste tópico')
+                        }
+                      }}
                     >
                       <Book size={14} className="mr-1" />
                       Estudar
@@ -454,7 +478,14 @@ export default function Dashboard({ onViewChange }: DashboardProps) {
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => onViewChange?.('practice', { topicId: topic.id })}
+                      onClick={() => {
+                        const topicQuestions = questions.filter(q => q.topicId === topic.id && q.isPublished)
+                        if (topicQuestions.length > 0) {
+                          onViewChange?.('practice', { topicId: topic.id })
+                        } else {
+                          toast.error('Não há questões disponíveis para prática neste tópico')
+                        }
+                      }}
                     >
                       <QuestionIcon size={14} className="mr-1" />
                       Praticar
