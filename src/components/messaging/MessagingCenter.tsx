@@ -176,17 +176,37 @@ const MessagingCenter = () => {
 
   return (
     <div className="h-screen flex bg-background overflow-hidden">
+      {/* Main Header for Full Screen Context */}
+      <div className="fixed top-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-b border-border z-50 lg:left-64">
+        <div className="flex items-center justify-between p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/15">
+              <MessageCircle className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-foreground">Centro de Mensagens</h1>
+              <p className="text-sm text-muted-foreground">
+                Comunicação em tempo real • {user.role === 'admin' ? 'Administrador' : 'Estudante'}
+              </p>
+            </div>
+          </div>
+          <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30">
+            Online
+          </Badge>
+        </div>
+      </div>
+      
       {/* Sidebar */}
-      <div className="w-80 xl:w-96 border-r bg-card/30 flex flex-col">
+      <div className="w-80 xl:w-96 border-r bg-card/30 flex flex-col mt-16">
         <div className="p-6 border-b bg-gradient-to-r from-primary/10 to-accent/10">
           <h2 className="text-2xl font-bold flex items-center gap-3">
             <div className="p-3 rounded-xl bg-primary/15 shadow-sm">
               <MessageCircle className="w-7 h-7 text-primary" />
             </div>
-            Centro de Mensagens
+            Conversas
           </h2>
           <p className="text-sm text-muted-foreground mt-2">
-            Converse em tempo real com {user.role === 'admin' ? 'alunos' : 'administradores'}
+            Selecione uma conversa para começar
           </p>
         </div>
 
@@ -358,8 +378,8 @@ const MessagingCenter = () => {
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Header */}
+      <div className="flex-1 flex flex-col min-w-0 mt-16">
+        {/* Chat Header */}
         <div className="p-6 border-b bg-gradient-to-r from-card/80 to-card/50 backdrop-blur-sm shrink-0">
           <div className="flex items-center gap-4">
             {activeTab === 'global' ? (

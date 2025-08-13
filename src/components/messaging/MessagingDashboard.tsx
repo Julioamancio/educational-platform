@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { ChatMessage, User } from '@/types'
 import { MessageCircle, Send, Users } from '@phosphor-icons/react'
+import { toast } from 'sonner'
 
 interface MessagingDashboardProps {
   onViewChange?: (view: string, data?: any) => void
@@ -52,6 +53,13 @@ const MessagingDashboard = ({ onViewChange }: MessagingDashboardProps) => {
     return total
   }
 
+  const handleNavigateToMessages = () => {
+    onViewChange?.('messages')
+    toast.success('Abrindo Centro de Mensagens...', {
+      description: 'Você será redirecionado para a aba de mensagens completa'
+    })
+  }
+
   const formatTime = (dateString: string) => {
     const date = new Date(dateString)
     const now = new Date()
@@ -70,12 +78,12 @@ const MessagingDashboard = ({ onViewChange }: MessagingDashboardProps) => {
   const totalUnread = getTotalUnreadCount()
 
   return (
-    <Card className="card-hover">
+    <Card className="card-hover glass-effect">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <MessageCircle className="w-5 h-5 text-primary" />
-            Mensagens
+            Centro de Mensagens
             {totalUnread > 0 && (
               <Badge variant="destructive" className="ml-1">
                 {totalUnread}
@@ -85,9 +93,11 @@ const MessagingDashboard = ({ onViewChange }: MessagingDashboardProps) => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => onViewChange?.('messages')}
+            onClick={handleNavigateToMessages}
+            className="hover:bg-primary/5 hover:border-primary/50"
           >
-            Ver Todas
+            <MessageCircle className="w-4 h-4 mr-1" />
+            Abrir Chat
           </Button>
         </div>
       </CardHeader>
@@ -106,11 +116,11 @@ const MessagingDashboard = ({ onViewChange }: MessagingDashboardProps) => {
             <Button 
               variant="outline" 
               size="sm" 
-              className="mt-3"
-              onClick={() => onViewChange?.('messages')}
+              className="mt-3 hover:bg-primary/5 hover:border-primary/50"
+              onClick={handleNavigateToMessages}
             >
               <Send className="w-4 h-4 mr-2" />
-              Iniciar Conversa
+              Abrir Centro de Mensagens
             </Button>
           </div>
         ) : (
@@ -124,8 +134,9 @@ const MessagingDashboard = ({ onViewChange }: MessagingDashboardProps) => {
               return (
                 <div
                   key={message.id}
-                  className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
-                  onClick={() => onViewChange?.('messages')}
+                  className="flex items-start gap-3 p-3 rounded-lg hover:bg-primary/5 cursor-pointer transition-all duration-200 border border-transparent hover:border-primary/20"
+                  onClick={handleNavigateToMessages}
+                  title="Clique para abrir o Centro de Mensagens"
                 >
                   <Avatar className="w-8 h-8 shrink-0">
                     <AvatarFallback className="bg-secondary text-secondary-foreground text-xs">
@@ -172,11 +183,11 @@ const MessagingDashboard = ({ onViewChange }: MessagingDashboardProps) => {
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="w-full"
-                onClick={() => onViewChange?.('messages')}
+                className="w-full hover:bg-primary/5 hover:border-primary/50 transition-colors"
+                onClick={handleNavigateToMessages}
               >
                 <MessageCircle className="w-4 h-4 mr-2" />
-                Abrir Centro de Mensagens
+                Ir para Centro de Mensagens
                 {totalUnread > 0 && (
                   <Badge variant="destructive" className="ml-2">
                     {totalUnread}
