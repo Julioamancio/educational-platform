@@ -175,18 +175,18 @@ const MessagingCenter = () => {
   if (!user) return null
 
   return (
-    <div className="h-[calc(100vh-8rem)] max-h-[900px] min-h-[700px] flex bg-background rounded-xl shadow-lg border overflow-hidden">
+    <div className="h-screen flex bg-background overflow-hidden">
       {/* Sidebar */}
-      <div className="w-96 border-r bg-card/50 flex flex-col">
-        <div className="p-6 border-b bg-gradient-to-r from-primary/5 to-accent/5">
-          <h2 className="text-xl font-bold flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <MessageCircle className="w-6 h-6 text-primary" />
+      <div className="w-80 xl:w-96 border-r bg-card/30 flex flex-col">
+        <div className="p-6 border-b bg-gradient-to-r from-primary/10 to-accent/10">
+          <h2 className="text-2xl font-bold flex items-center gap-3">
+            <div className="p-3 rounded-xl bg-primary/15 shadow-sm">
+              <MessageCircle className="w-7 h-7 text-primary" />
             </div>
             Centro de Mensagens
           </h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Converse em tempo real com administradores
+          <p className="text-sm text-muted-foreground mt-2">
+            Converse em tempo real com {user.role === 'admin' ? 'alunos' : 'administradores'}
           </p>
         </div>
 
@@ -358,9 +358,9 @@ const MessagingCenter = () => {
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <div className="p-6 border-b bg-gradient-to-r from-card/80 to-card/50 backdrop-blur-sm">
+        <div className="p-6 border-b bg-gradient-to-r from-card/80 to-card/50 backdrop-blur-sm shrink-0">
           <div className="flex items-center gap-4">
             {activeTab === 'global' ? (
               <>
@@ -404,8 +404,8 @@ const MessagingCenter = () => {
         </div>
 
         {/* Messages Area */}
-        <ScrollArea className="flex-1 p-6">
-          <div className="space-y-6 min-h-[500px]">
+        <ScrollArea className="flex-1 min-h-0">
+          <div className="p-6 space-y-6 min-h-full">
             {getFilteredMessages().map(message => (
               <div
                 key={message.id}
@@ -447,7 +447,7 @@ const MessagingCenter = () => {
 
         {/* Message Input */}
         {(activeTab === 'global' || (activeTab === 'private' && selectedUser)) && (
-          <div className="p-6 border-t bg-gradient-to-r from-card/80 to-card/50 backdrop-blur-sm">
+          <div className="p-6 border-t bg-gradient-to-r from-card/80 to-card/50 backdrop-blur-sm shrink-0">
             <div className="flex gap-3">
               <div className="relative">
                 <Button

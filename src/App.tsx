@@ -111,6 +111,20 @@ function AppContent() {
     }
   }
 
+  // Special layout for messaging center
+  if (currentView === 'messages') {
+    return (
+      <div className="min-h-screen bg-background">
+        <Sidebar currentView={currentView} onViewChange={handleViewChange} />
+        <main className="lg:pl-64 transition-all duration-300">
+          <div className="h-screen">
+            {renderMainContent()}
+          </div>
+        </main>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Sidebar currentView={currentView} onViewChange={handleViewChange} />
