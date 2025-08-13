@@ -215,14 +215,6 @@ export default function Dashboard({ onViewChange }: DashboardProps) {
           <MessagingDashboard onViewChange={onViewChange} />
 
           <Card className="glass-effect">
-                    <p>Nenhuma tentativa ainda</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-effect">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Book size={20} className="text-secondary" weight="fill" />
