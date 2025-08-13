@@ -23,8 +23,24 @@ const MessagingCenter = () => {
   const [activeTab, setActiveTab] = useState('global')
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const [unreadCounts, setUnreadCounts] = useKV<Record<string, number>>('message-unread-counts', {})
+  const [showSidebar, setShowSidebar] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messageInputRef = useRef<HTMLInputElement>(null)
+
+  // Check for mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024)
+      if (window.innerWidth >= 1024) {
+        setShowSidebar(true)
+      }
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Scroll to bottom when new messages arrive
   const scrollToBottom = () => {
@@ -178,44 +194,68 @@ const MessagingCenter = () => {
     <div className="h-screen flex bg-background overflow-hidden">
       {/* Main Header for Full Screen Context */}
       <div className="fixed top-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-b border-border z-50 lg:left-64">
-        <div className="flex items-center justify-between p-4">
+        <div className="flex items-center justify-between p-3 lg:p-4">
           <div className="flex items-center gap-3">
+            {isMobile && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowSidebar(!showSidebar)}
+                className="shrink-0 w-10 h-10 lg:hidden"
+              >
+                <Users className="w-5 h-5" />
+              </Button>
+            )}
             <div className="p-2 rounded-lg bg-primary/15">
-              <MessageCircle className="w-6 h-6 text-primary" />
+              <MessageCircle className="w-5 h-5 lg:w-6 lg:h-6 text-primary" />
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-foreground">Centro de Mensagens</h1>
-              <p className="text-sm text-muted-foreground">
+            <div className="min-w-0">
+              <h1 className="text-lg lg:text-xl font-bold text-foreground truncate">Centro de Mensagens</h1>
+              <p className="text-xs lg:text-sm text-muted-foreground hidden sm:block">
                 Comunicação em tempo real • {user.role === 'admin' ? 'Administrador' : 'Estudante'}
               </p>
             </div>
           </div>
-          <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30">
+          <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 text-xs lg:text-sm">
             Online
           </Badge>
         </div>
       </div>
       
+      {/* Mobile Overlay */}
+      {isMobile && showSidebar && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setShowSidebar(false)}
+        />
+      )}
+      
       {/* Sidebar */}
-      <div className="w-80 xl:w-96 border-r bg-card/30 flex flex-col mt-16">
-        <div className="p-6 border-b bg-gradient-to-r from-primary/10 to-accent/10">
-          <h2 className="text-2xl font-bold flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-primary/15 shadow-sm">
-              <MessageCircle className="w-7 h-7 text-primary" />
+      <div className={`
+        ${isMobile ? 'fixed' : 'relative'} 
+        ${isMobile && !showSidebar ? '-translate-x-full' : 'translate-x-0'}
+        w-80 xl:w-96 border-r bg-card/30 flex flex-col mt-16 
+        transition-transform duration-300 ease-in-out z-50
+        ${isMobile ? 'h-[calc(100vh-4rem)]' : 'h-full'}
+      `}>
+        <div className="p-4 lg:p-6 border-b bg-gradient-to-r from-primary/10 to-accent/10">
+          <h2 className="text-xl lg:text-2xl font-bold flex items-center gap-3">
+            <div className="p-2 lg:p-3 rounded-xl bg-primary/15 shadow-sm">
+              <MessageCircle className="w-5 h-5 lg:w-7 lg:h-7 text-primary" />
             </div>
             Conversas
           </h2>
-          <p className="text-sm text-muted-foreground mt-2">
+          <p className="text-xs lg:text-sm text-muted-foreground mt-2">
             Selecione uma conversa para começar
           </p>
         </div>
 
-        <ScrollArea className="flex-1 p-4">
+        <ScrollArea className="flex-1 p-3 lg:p-4">
           {user.role === 'admin' ? (
             <div className="space-y-3">
               {/* Global Chat */}
               <div
-                className={`p-4 rounded-xl cursor-pointer transition-all duration-200 ${
+                className={`p-3 lg:p-4 rounded-xl cursor-pointer transition-all duration-200 ${
                   activeTab === 'global' 
                     ? 'bg-gradient-to-r from-primary/15 to-accent/10 border-2 border-primary/30 shadow-md' 
                     : 'hover:bg-muted/50 border border-transparent hover:border-border/50'
@@ -224,22 +264,23 @@ const MessagingCenter = () => {
                   setActiveTab('global')
                   setSelectedUser(null)
                   markAsRead('global')
+                  if (isMobile) setShowSidebar(false)
                 }}
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary/20 to-accent/20 flex items-center justify-center">
-                      <Hash className="w-6 h-6 text-primary" />
+                  <div className="flex items-center gap-3 lg:gap-4 min-w-0">
+                    <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-gradient-to-r from-primary/20 to-accent/20 flex items-center justify-center shrink-0">
+                      <Hash className="w-5 h-5 lg:w-6 lg:h-6 text-primary" />
                     </div>
-                    <div>
-                      <p className="font-semibold text-base">Chat Geral</p>
-                      <p className="text-sm text-muted-foreground">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-sm lg:text-base">Chat Geral</p>
+                      <p className="text-xs lg:text-sm text-muted-foreground truncate">
                         Conversa com todos os alunos
                       </p>
                     </div>
                   </div>
                   {(unreadCounts[`global-${user.id}`] || 0) > 0 && (
-                    <Badge variant="destructive" className="h-6 min-w-6 flex items-center justify-center">
+                    <Badge variant="destructive" className="h-5 min-w-5 lg:h-6 lg:min-w-6 flex items-center justify-center text-xs shrink-0">
                       {unreadCounts[`global-${user.id}`]}
                     </Badge>
                   )}
@@ -270,7 +311,7 @@ const MessagingCenter = () => {
                   return (
                     <div
                       key={student.id}
-                      className={`p-4 rounded-xl cursor-pointer transition-all duration-200 ${
+                      className={`p-3 lg:p-4 rounded-xl cursor-pointer transition-all duration-200 ${
                         selectedUser === student.id && activeTab === 'private'
                           ? 'bg-gradient-to-r from-primary/15 to-accent/10 border-2 border-primary/30 shadow-md' 
                           : 'hover:bg-muted/50 border border-transparent hover:border-border/50'
@@ -279,32 +320,33 @@ const MessagingCenter = () => {
                         setActiveTab('private')
                         setSelectedUser(student.id)
                         markAsRead('private', student.id)
+                        if (isMobile) setShowSidebar(false)
                       }}
                     >
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <Avatar className="w-12 h-12 border-2 border-border/20">
-                            <AvatarFallback className="bg-gradient-to-r from-secondary to-secondary/80 text-secondary-foreground font-semibold">
+                        <div className="flex items-center gap-3 lg:gap-4 min-w-0">
+                          <Avatar className="w-10 h-10 lg:w-12 lg:h-12 border-2 border-border/20 shrink-0">
+                            <AvatarFallback className="bg-gradient-to-r from-secondary to-secondary/80 text-secondary-foreground font-semibold text-xs lg:text-sm">
                               {student.name.split(' ').map(n => n[0]).join('').toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
                           <div className="min-w-0 flex-1">
-                            <p className="font-semibold text-base truncate">{student.name}</p>
+                            <p className="font-semibold text-sm lg:text-base truncate">{student.name}</p>
                             {lastMessage && (
-                              <p className="text-sm text-muted-foreground truncate mt-1">
+                              <p className="text-xs lg:text-sm text-muted-foreground truncate mt-1">
                                 {lastMessage.message}
                               </p>
                             )}
                           </div>
                         </div>
-                        <div className="flex flex-col items-end gap-2">
+                        <div className="flex flex-col items-end gap-1 lg:gap-2 shrink-0">
                           {lastMessage && (
                             <span className="text-xs text-muted-foreground font-medium">
                               {formatTime(lastMessage.createdAt)}
                             </span>
                           )}
                           {unreadCount > 0 && (
-                            <Badge variant="destructive" className="h-6 min-w-6 flex items-center justify-center">
+                            <Badge variant="destructive" className="h-5 min-w-5 lg:h-6 lg:min-w-6 flex items-center justify-center text-xs">
                               {unreadCount}
                             </Badge>
                           )}
@@ -321,7 +363,7 @@ const MessagingCenter = () => {
               {getChatRooms().map(room => (
                 <div
                   key={room.id}
-                  className={`p-4 rounded-xl cursor-pointer transition-all duration-200 ${
+                  className={`p-3 lg:p-4 rounded-xl cursor-pointer transition-all duration-200 ${
                     (room.type === 'global' && activeTab === 'global') ||
                     (room.type === 'private' && selectedUser === room.id)
                       ? 'bg-gradient-to-r from-primary/15 to-accent/10 border-2 border-primary/30 shadow-md' 
@@ -337,34 +379,35 @@ const MessagingCenter = () => {
                       setSelectedUser(room.id)
                       markAsRead('private', room.id)
                     }
+                    if (isMobile) setShowSidebar(false)
                   }}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary/20 to-accent/20 flex items-center justify-center">
+                    <div className="flex items-center gap-3 lg:gap-4 min-w-0">
+                      <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-gradient-to-r from-primary/20 to-accent/20 flex items-center justify-center shrink-0">
                         {room.type === 'global' ? (
-                          <Hash className="w-6 h-6 text-primary" />
+                          <Hash className="w-5 h-5 lg:w-6 lg:h-6 text-primary" />
                         ) : (
-                          <AtSign className="w-6 h-6 text-primary" />
+                          <AtSign className="w-5 h-5 lg:w-6 lg:h-6 text-primary" />
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-base">{room.title}</p>
+                        <p className="font-semibold text-sm lg:text-base">{room.title}</p>
                         {room.lastMessage && (
-                          <p className="text-sm text-muted-foreground truncate mt-1">
+                          <p className="text-xs lg:text-sm text-muted-foreground truncate mt-1">
                             {room.lastMessage.senderName}: {room.lastMessage.message}
                           </p>
                         )}
                       </div>
                     </div>
-                    <div className="flex flex-col items-end gap-2">
+                    <div className="flex flex-col items-end gap-1 lg:gap-2 shrink-0">
                       {room.lastMessage && (
                         <span className="text-xs text-muted-foreground font-medium">
                           {formatTime(room.lastMessage.createdAt)}
                         </span>
                       )}
                       {room.unreadCount > 0 && (
-                        <Badge variant="destructive" className="h-6 min-w-6 flex items-center justify-center">
+                        <Badge variant="destructive" className="h-5 min-w-5 lg:h-6 lg:min-w-6 flex items-center justify-center text-xs">
                           {room.unreadCount}
                         </Badge>
                       )}
@@ -378,18 +421,18 @@ const MessagingCenter = () => {
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col min-w-0 mt-16">
+      <div className={`flex-1 flex flex-col min-w-0 mt-16 ${isMobile && showSidebar ? 'hidden' : ''}`}>
         {/* Chat Header */}
-        <div className="p-6 border-b bg-gradient-to-r from-card/80 to-card/50 backdrop-blur-sm shrink-0">
-          <div className="flex items-center gap-4">
+        <div className="p-4 lg:p-6 border-b bg-gradient-to-r from-card/80 to-card/50 backdrop-blur-sm shrink-0">
+          <div className="flex items-center gap-3 lg:gap-4">
             {activeTab === 'global' ? (
               <>
-                <div className="w-14 h-14 rounded-full bg-gradient-to-r from-primary/20 to-accent/20 flex items-center justify-center">
-                  <Hash className="w-7 h-7 text-primary" />
+                <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-gradient-to-r from-primary/20 to-accent/20 flex items-center justify-center shrink-0">
+                  <Hash className="w-6 h-6 lg:w-7 lg:h-7 text-primary" />
                 </div>
-                <div>
-                  <h3 className="font-bold text-xl">Chat Geral</h3>
-                  <p className="text-sm text-muted-foreground">
+                <div className="min-w-0">
+                  <h3 className="font-bold text-lg lg:text-xl">Chat Geral</h3>
+                  <p className="text-xs lg:text-sm text-muted-foreground">
                     {user.role === 'admin' ? 'Conversa com todos os alunos' : 'Conversa geral'}
                   </p>
                 </div>
@@ -399,14 +442,14 @@ const MessagingCenter = () => {
                 const targetUser = users.find(u => u.id === selectedUser)
                 return targetUser ? (
                   <>
-                    <Avatar className="w-14 h-14 border-2 border-border/20">
-                      <AvatarFallback className="bg-gradient-to-r from-secondary to-secondary/80 text-secondary-foreground font-bold text-lg">
+                    <Avatar className="w-12 h-12 lg:w-14 lg:h-14 border-2 border-border/20 shrink-0">
+                      <AvatarFallback className="bg-gradient-to-r from-secondary to-secondary/80 text-secondary-foreground font-bold text-sm lg:text-lg">
                         {targetUser.name.split(' ').map(n => n[0]).join('').toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <div>
-                      <h3 className="font-bold text-xl">{targetUser.name}</h3>
-                      <p className="text-sm text-muted-foreground">
+                    <div className="min-w-0">
+                      <h3 className="font-bold text-lg lg:text-xl truncate">{targetUser.name}</h3>
+                      <p className="text-xs lg:text-sm text-muted-foreground">
                         Conversa privada • {targetUser.role === 'admin' ? 'Administrador' : 'Aluno'}
                       </p>
                     </div>
@@ -414,10 +457,10 @@ const MessagingCenter = () => {
                 ) : null
               })()
             ) : (
-              <div className="text-center text-muted-foreground flex-1 py-8">
-                <MessageCircle className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                <h3 className="text-lg font-semibold mb-2">Selecione uma conversa</h3>
-                <p className="text-sm">Escolha um chat para começar a conversar</p>
+              <div className="text-center text-muted-foreground flex-1 py-6 lg:py-8">
+                <MessageCircle className="w-12 h-12 lg:w-16 lg:h-16 mx-auto mb-4 opacity-50" />
+                <h3 className="text-base lg:text-lg font-semibold mb-2">Selecione uma conversa</h3>
+                <p className="text-xs lg:text-sm">Escolha um chat para começar a conversar</p>
               </div>
             )}
           </div>
@@ -425,15 +468,15 @@ const MessagingCenter = () => {
 
         {/* Messages Area */}
         <ScrollArea className="flex-1 min-h-0">
-          <div className="p-6 space-y-6 min-h-full">
+          <div className="p-4 lg:p-6 space-y-4 lg:space-y-6 min-h-full">
             {getFilteredMessages().map(message => (
               <div
                 key={message.id}
                 className={`flex ${message.senderId === user.id ? 'justify-end' : 'justify-start'}`}
               >
-                <div className={`max-w-[75%] ${message.senderId === user.id ? 'order-2' : 'order-1'}`}>
+                <div className={`max-w-[85%] lg:max-w-[75%] ${message.senderId === user.id ? 'order-2' : 'order-1'}`}>
                   <div
-                    className={`p-4 rounded-2xl shadow-sm ${
+                    className={`p-3 lg:p-4 rounded-2xl shadow-sm ${
                       message.senderId === user.id
                         ? 'bg-gradient-to-r from-primary to-primary/90 text-primary-foreground ml-auto'
                         : 'bg-muted border border-border/50'
@@ -441,7 +484,7 @@ const MessagingCenter = () => {
                   >
                     {message.senderId !== user.id && (
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="text-sm font-semibold text-muted-foreground">
+                        <span className="text-xs lg:text-sm font-semibold text-muted-foreground">
                           {message.senderName}
                         </span>
                         {message.senderRole === 'admin' && (
@@ -449,7 +492,7 @@ const MessagingCenter = () => {
                         )}
                       </div>
                     )}
-                    <p className="whitespace-pre-wrap break-words text-base leading-relaxed">{message.message}</p>
+                    <p className="whitespace-pre-wrap break-words text-sm lg:text-base leading-relaxed">{message.message}</p>
                     <p className={`text-xs mt-2 ${
                       message.senderId === user.id 
                         ? 'text-primary-foreground/70' 
@@ -467,19 +510,19 @@ const MessagingCenter = () => {
 
         {/* Message Input */}
         {(activeTab === 'global' || (activeTab === 'private' && selectedUser)) && (
-          <div className="p-6 border-t bg-gradient-to-r from-card/80 to-card/50 backdrop-blur-sm shrink-0">
-            <div className="flex gap-3">
+          <div className="p-3 lg:p-6 border-t bg-gradient-to-r from-card/80 to-card/50 backdrop-blur-sm shrink-0">
+            <div className="flex gap-2 lg:gap-3">
               <div className="relative">
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                  className="shrink-0 w-12 h-12 rounded-xl"
+                  className="shrink-0 w-10 h-10 lg:w-12 lg:h-12 rounded-xl"
                 >
-                  <Smile className="w-5 h-5" />
+                  <Smile className="w-4 h-4 lg:w-5 lg:h-5" />
                 </Button>
                 {showEmojiPicker && (
-                  <div className="absolute bottom-16 left-0 z-50">
+                  <div className="absolute bottom-12 lg:bottom-16 left-0 z-50">
                     <EmojiPicker onEmojiSelect={handleEmojiSelect} />
                   </div>
                 )}
@@ -494,14 +537,14 @@ const MessagingCenter = () => {
                     ? 'Digite sua mensagem no chat geral...' 
                     : 'Digite sua mensagem privada...'
                 }
-                className="flex-1 h-12 rounded-xl text-base px-4"
+                className="flex-1 h-10 lg:h-12 rounded-xl text-sm lg:text-base px-3 lg:px-4"
               />
               <Button 
                 onClick={sendMessage}
                 disabled={!newMessage.trim()}
-                className="shrink-0 w-12 h-12 rounded-xl"
+                className="shrink-0 w-10 h-10 lg:w-12 lg:h-12 rounded-xl"
               >
-                <Send className="w-5 h-5" />
+                <Send className="w-4 h-4 lg:w-5 lg:h-5" />
               </Button>
             </div>
           </div>
