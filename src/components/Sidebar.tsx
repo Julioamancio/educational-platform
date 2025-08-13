@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { useAuth } from '@/contexts/AuthContext'
 import { usePlatformSettings } from '@/hooks/usePlatformSettings'
+import { useMessageNotifications } from '@/hooks/useMessageNotifications'
 import { cn } from '@/lib/utils'
 import { 
   House, 
@@ -22,7 +24,8 @@ import {
   Lightning,
   List,
   Key,
-  X
+  X,
+  MessageCircle
 } from '@phosphor-icons/react'
 
 interface SidebarProps {
@@ -35,6 +38,7 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isMobileOpen, setIsMobileOpen] = useState(false)
   const [settings] = usePlatformSettings()
+  const { totalUnread } = useMessageNotifications()
 
   const adminMenuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: House },
@@ -42,6 +46,7 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
     { id: 'contents', label: 'Conteúdos', icon: FileText },
     { id: 'questions', label: 'Questões', icon: Question },
     { id: 'users', label: 'Usuários', icon: Users },
+    { id: 'messages', label: 'Mensagens', icon: MessageCircle },
     { id: 'reports', label: 'Relatórios', icon: ChartBar },
     { id: 'credentials', label: 'Credenciais', icon: Key },
     { id: 'settings', label: 'Configurações', icon: Gear },
@@ -52,6 +57,7 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
     { id: 'topics', label: 'Tópicos', icon: Books },
     { id: 'study', label: 'Estudar', icon: BookOpenText },
     { id: 'practice', label: 'Praticar', icon: Target },
+    { id: 'messages', label: 'Mensagens', icon: MessageCircle },
     { id: 'review', label: 'Revisar', icon: TrendUp },
     { id: 'progress', label: 'Progresso', icon: ChartBar },
   ]
@@ -161,12 +167,26 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
                     weight={isActive ? "fill" : "regular"}
                   />
                   {(!isCollapsed || !isDesktop) && (
-                    <span className={cn(
-                      "text-sm transition-colors duration-200",
-                      isActive ? "text-primary" : "text-foreground"
-                    )}>
-                      {item.label}
-                    </span>
+                    <div className="flex items-center justify-between flex-1">
+                      <span className={cn(
+                        "text-sm transition-colors duration-200",
+                        isActive ? "text-primary" : "text-foreground"
+                      )}>
+                        {item.label}
+                      </span>
+                      {item.id === 'messages' && totalUnread > 0 && (
+                        <Badge variant="destructive" className="ml-2 text-xs">
+                          {totalUnread > 99 ? '99+' : totalUnread}
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Badge for collapsed state */}
+                  {isDesktop && isCollapsed && item.id === 'messages' && totalUnread > 0 && (
+                    <Badge variant="destructive" className="absolute -top-1 -right-1 text-xs min-w-[18px] h-[18px] flex items-center justify-center p-0">
+                      {totalUnread > 9 ? '9+' : totalUnread}
+                    </Badge>
                   )}
                   
                   {/* Tooltip for collapsed state */}

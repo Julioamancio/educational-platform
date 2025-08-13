@@ -35,6 +35,16 @@
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
 - **Real-time Updates**: All data persists automatically using the Spark KV system
 - **Modern UI**: Professional interface with smooth animations and accessibility features
+- **Messaging System**: Real-time intranet-style communication with emoji support
+
+### Messaging Features
+- **Global Chat**: Public communication channel for announcements and general discussion
+- **Private Messages**: Direct communication between administrators and individual students
+- **Emoji Support**: Rich emoji picker with categorized selection for expressive communication
+- **Real-time Notifications**: Unread message indicators with count badges in sidebar
+- **Message History**: Persistent message storage with timestamp and read status tracking
+- **User Context**: Clear sender identification with role badges (Admin/Student)
+- **Mobile Responsive**: Optimized messaging interface for all device sizes
 
 ## Design Direction
 

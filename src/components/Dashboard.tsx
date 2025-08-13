@@ -20,10 +20,13 @@ import {
   Trophy, 
   Activity, 
   Sparkle, 
-  FileText 
+  FileText,
+  MessageCircle
 } from '@phosphor-icons/react'
 import { initializeSampleData } from '@/lib/sampleData'
+import { initializeSampleMessages } from '@/lib/sampleMessages'
 import { toast } from 'sonner'
+import MessagingDashboard from '@/components/messaging/MessagingDashboard'
 
 interface DashboardProps {
   onViewChange?: (view: string, data?: any) => void
@@ -37,15 +40,20 @@ export default function Dashboard({ onViewChange }: DashboardProps) {
   const [attempts] = useKV<Attempt[]>('attempts', [])
   const [studyLogs] = useKV<StudyLog[]>('studyLogs', [])
   const [users, setUsers] = useKV<any[]>('users', [])
+  const [messages, setMessages] = useKV<any[]>('chat-messages', [])
 
   const loadSampleData = () => {
     const sampleData = initializeSampleData()
+    const sampleMessages = initializeSampleMessages()
+    
     setUsers(sampleData.users)
     setTopics(sampleData.topics)
     setContents(sampleData.contents)
     setQuestions(sampleData.questions)
+    setMessages(sampleMessages.messages)
+    
     toast.success('Dados de exemplo carregados!', {
-      description: 'A plataforma agora tem usuários, tópicos, conteúdos e questões de exemplo para explorar.'
+      description: 'A plataforma agora tem usuários, tópicos, conteúdos, questões e mensagens de exemplo para explorar.'
     })
   }
 
@@ -154,7 +162,7 @@ export default function Dashboard({ onViewChange }: DashboardProps) {
           </Card>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <Card className="glass-effect">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -196,6 +204,17 @@ export default function Dashboard({ onViewChange }: DashboardProps) {
                 {attempts.length === 0 && (
                   <div className="text-center py-8 text-muted-foreground">
                     <Activity size={32} className="mx-auto mb-2 opacity-50" />
+                    <p>Nenhuma tentativa ainda</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Admin Messaging Dashboard */}
+          <MessagingDashboard onViewChange={onViewChange} />
+
+          <Card className="glass-effect">
                     <p>Nenhuma tentativa ainda</p>
                   </div>
                 )}
@@ -402,7 +421,7 @@ export default function Dashboard({ onViewChange }: DashboardProps) {
       </Card>
 
       {/* Recent Activity for Students */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <Card className="glass-effect">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -449,6 +468,9 @@ export default function Dashboard({ onViewChange }: DashboardProps) {
             </div>
           </CardContent>
         </Card>
+
+        {/* Messaging Dashboard */}
+        <MessagingDashboard onViewChange={onViewChange} />
 
         {/* Progress by Topic - Moved from below */}
         <Card className="glass-effect">

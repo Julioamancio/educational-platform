@@ -19,6 +19,7 @@ import StudyView from '@/components/student/StudyView'
 import AllContentsView from '@/components/student/AllContentsView'
 import ReviewView from '@/components/student/ReviewView'
 import ProgressView from '@/components/student/ProgressView'
+import MessagingCenter from '@/components/messaging/MessagingCenter'
 
 function AppContent() {
   const { user, isLoading } = useAuth()
@@ -65,6 +66,8 @@ function AppContent() {
         return user.role === 'admin' ? <SettingsManagement /> : null
       case 'credentials':
         return user.role === 'admin' ? <CredentialsView /> : null
+      case 'messages':
+        return <MessagingCenter />
       
       // Student views
       case 'practice':

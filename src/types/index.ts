@@ -67,3 +67,24 @@ export interface StudyLog {
   markedDone: boolean
   createdAt: string
 }
+
+export interface ChatMessage {
+  id: string
+  senderId: string
+  receiverId?: string
+  message: string
+  isGlobal: boolean
+  createdAt: string
+  readAt?: string
+  senderName: string
+  senderRole: 'admin' | 'student'
+}
+
+export interface ChatRoom {
+  id: string
+  type: 'global' | 'private'
+  participants: string[]
+  lastMessage?: ChatMessage
+  unreadCount: number
+  title?: string
+}
