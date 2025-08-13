@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { useAuth } from '@/contexts/AuthContext'
 import { usePlatformSettings } from '@/hooks/usePlatformSettings'
 import { useMessageNotifications } from '@/hooks/useMessageNotifications'
+import OnlineCountBadge from '@/components/OnlineCountBadge'
 import { cn } from '@/lib/utils'
 import { 
   House, 
@@ -211,7 +212,14 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-border">
+      <div className="p-4 border-t border-border space-y-3">
+        {/* Online Status Display */}
+        {(!isCollapsed || !isDesktop) && (
+          <div className="flex items-center justify-center">
+            <OnlineCountBadge className="w-full justify-center" />
+          </div>
+        )}
+        
         <Button
           variant="ghost"
           className={cn(

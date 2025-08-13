@@ -1,5 +1,6 @@
 import { useKV } from '@github/spark/hooks'
 import { useAuth } from '@/contexts/AuthContext'
+import { useMessageNotifications } from '@/hooks/useMessageNotifications'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -17,6 +18,7 @@ const MessagingDashboard = ({ onViewChange }: MessagingDashboardProps) => {
   const [messages, setMessages] = useKV<ChatMessage[]>('chat-messages', [])
   const [users, setUsers] = useKV<User[]>('users', [])
   const [unreadCounts, setUnreadCounts] = useKV<Record<string, number>>('message-unread-counts', {})
+  const { clearAllNotifications } = useMessageNotifications()
 
   if (!user) return null
 
@@ -56,6 +58,7 @@ const MessagingDashboard = ({ onViewChange }: MessagingDashboardProps) => {
   }
 
   const handleNavigateToMessages = () => {
+    clearAllNotifications()
     onViewChange?.('messages')
     toast.success('Abrindo Centro de Mensagens...', {
       description: 'Você será redirecionado para a aba de mensagens completa'

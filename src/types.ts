@@ -6,6 +6,8 @@ export interface User {
   role: 'admin' | 'student'
   createdAt: string
   lastLogin?: string
+  isOnline?: boolean
+  lastSeen?: string
 }
 
 export interface Topic {
@@ -75,4 +77,27 @@ export interface MediaFile {
   size: number
   url: string
   uploadedAt: string
+}
+
+export interface ChatMessage {
+  id: string
+  senderId: string
+  receiverId?: string
+  message: string
+  isGlobal: boolean
+  createdAt: string
+  emoji?: string
+}
+
+export interface ChatRoom {
+  id: string
+  type: 'global' | 'private'
+  title: string
+  lastMessage?: {
+    id: string
+    senderName: string
+    message: string
+    createdAt: string
+  }
+  unreadCount: number
 }

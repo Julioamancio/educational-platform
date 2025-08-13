@@ -27,6 +27,7 @@ import { initializeSampleData } from '@/lib/sampleData'
 import { initializeSampleMessages } from '@/lib/sampleMessages'
 import { toast } from 'sonner'
 import MessagingDashboard from '@/components/messaging/MessagingDashboard'
+import OnlineUsersList from '@/components/OnlineUsersList'
 
 interface DashboardProps {
   onViewChange?: (view: string, data?: any) => void
@@ -213,6 +214,9 @@ export default function Dashboard({ onViewChange }: DashboardProps) {
 
           {/* Admin Messaging Dashboard */}
           <MessagingDashboard onViewChange={onViewChange} />
+
+          {/* Online Users List */}
+          <OnlineUsersList />
 
           <Card className="glass-effect">
             <CardHeader>
@@ -463,6 +467,9 @@ export default function Dashboard({ onViewChange }: DashboardProps) {
 
         {/* Messaging Dashboard */}
         <MessagingDashboard onViewChange={onViewChange} />
+
+        {/* Online Users List for Students */}
+        <OnlineUsersList />
 
         {/* Progress by Topic - Moved from below */}
         <Card className="glass-effect">

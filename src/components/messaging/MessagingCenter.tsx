@@ -13,6 +13,9 @@ import { ChatMessage, ChatRoom, User } from '@/types'
 import { Send, Users, MessageCircle, Smile, Hash, AtSign } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import EmojiPicker from './EmojiPicker'
+import OnlineStatus from '@/components/OnlineStatus'
+import OnlineUsersList from '@/components/OnlineUsersList'
+import OnlineCountBadge from '@/components/OnlineCountBadge'
 
 const MessagingCenter = () => {
   const { user } = useAuth()
@@ -234,9 +237,7 @@ const MessagingCenter = () => {
               </p>
             </div>
           </div>
-          <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 text-xs lg:text-sm">
-            Online
-          </Badge>
+          <OnlineCountBadge className="text-xs lg:text-sm" />
         </div>
       </div>
       
@@ -310,10 +311,13 @@ const MessagingCenter = () => {
               {/* Students List */}
               <div className="space-y-2">
                 <div className="px-2 mb-3">
-                  <p className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
-                    <Users className="w-4 h-4" />
-                    Alunos Conectados ({getStudents().length})
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+                      <Users className="w-4 h-4" />
+                      Alunos ({getStudents().length})
+                    </p>
+                    <OnlineCountBadge showIcon={false} className="text-xs" />
+                  </div>
                 </div>
                 {getStudents().map(student => {
                   const unreadKey = `private-${student.id}-${user.id}`
@@ -343,17 +347,26 @@ const MessagingCenter = () => {
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3 lg:gap-4 min-w-0">
-                          <Avatar className="w-10 h-10 lg:w-12 lg:h-12 border-2 border-border/20 shrink-0">
-                            <AvatarFallback className="bg-gradient-to-r from-secondary to-secondary/80 text-secondary-foreground font-semibold text-xs lg:text-sm">
-                              {student.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
+                          <div className="relative">
+                            <Avatar className="w-10 h-10 lg:w-12 lg:h-12 border-2 border-border/20 shrink-0">
+                              <AvatarFallback className="bg-gradient-to-r from-secondary to-secondary/80 text-secondary-foreground font-semibold text-xs lg:text-sm">
+                                {student.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="absolute -bottom-1 -right-1">
+                              <OnlineStatus userId={student.id} size="sm" />
+                            </div>
+                          </div>
                           <div className="min-w-0 flex-1">
-                            <p className="font-semibold text-sm lg:text-base truncate">{student.name}</p>
-                            {lastMessage && (
+                            <div className="flex items-center gap-2">
+                              <p className="font-semibold text-sm lg:text-base truncate">{student.name}</p>
+                            </div>
+                            {lastMessage ? (
                               <p className="text-xs lg:text-sm text-muted-foreground truncate mt-1">
                                 {lastMessage.message}
                               </p>
+                            ) : (
+                              <OnlineStatus userId={student.id} showText size="sm" />
                             )}
                           </div>
                         </div>
@@ -460,16 +473,25 @@ const MessagingCenter = () => {
                 const targetUser = users.find(u => u.id === selectedUser)
                 return targetUser ? (
                   <>
-                    <Avatar className="w-12 h-12 lg:w-14 lg:h-14 border-2 border-border/20 shrink-0">
-                      <AvatarFallback className="bg-gradient-to-r from-secondary to-secondary/80 text-secondary-foreground font-bold text-sm lg:text-lg">
-                        {targetUser.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
+                    <div className="relative">
+                      <Avatar className="w-12 h-12 lg:w-14 lg:h-14 border-2 border-border/20 shrink-0">
+                        <AvatarFallback className="bg-gradient-to-r from-secondary to-secondary/80 text-secondary-foreground font-bold text-sm lg:text-lg">
+                          {targetUser.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="absolute -bottom-1 -right-1">
+                        <OnlineStatus userId={targetUser.id} size="md" />
+                      </div>
+                    </div>
                     <div className="min-w-0">
                       <h3 className="font-bold text-lg lg:text-xl truncate">{targetUser.name}</h3>
-                      <p className="text-xs lg:text-sm text-muted-foreground">
-                        Conversa privada • {targetUser.role === 'admin' ? 'Administrador' : 'Aluno'}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <OnlineStatus userId={targetUser.id} showText size="sm" />
+                        <span className="text-muted-foreground">•</span>
+                        <span className="text-xs lg:text-sm text-muted-foreground">
+                          {targetUser.role === 'admin' ? 'Administrador' : 'Aluno'}
+                        </span>
+                      </div>
                     </div>
                   </>
                 ) : null

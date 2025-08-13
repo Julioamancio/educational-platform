@@ -11,6 +11,7 @@ import { useKV } from '@github/spark/hooks'
 import { User } from '@/types'
 import { Plus, Trash, Users, UserCircle, Check, X, MagnifyingGlass, Funnel, Download, Warning, Shield, Eye, EyeSlash, Copy } from '@phosphor-icons/react'
 import { toast } from 'sonner'
+import OnlineStatus from '@/components/OnlineStatus'
 
 function StudentsManagement() {
   const [users, setUsers] = useKV<User[]>('users', [])
@@ -293,8 +294,11 @@ function StudentsManagement() {
                           onCheckedChange={(checked) => handleSelectStudent(student.id, checked as boolean)}
                         />
                         
-                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center relative">
                           <UserCircle className="w-6 h-6 text-primary" />
+                          <div className="absolute -bottom-1 -right-1">
+                            <OnlineStatus userId={student.id} size="sm" />
+                          </div>
                         </div>
                         
                         <div>
@@ -311,6 +315,7 @@ function StudentsManagement() {
                             </Button>
                           </div>
                           <div className="flex items-center gap-4 mt-1">
+                            <OnlineStatus userId={student.id} showText size="sm" />
                             <span className="text-xs text-muted-foreground">
                               Joined: {new Date(student.createdAt || '').toLocaleDateString()}
                             </span>
@@ -380,12 +385,18 @@ function StudentsManagement() {
                       className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/30 transition-colors"
                     >
                       <div className="flex items-center space-x-4">
-                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center relative">
                           <Shield className="w-6 h-6 text-primary" />
+                          <div className="absolute -bottom-1 -right-1">
+                            <OnlineStatus userId={admin.id} size="sm" />
+                          </div>
                         </div>
                         
                         <div className="flex-1">
-                          <h4 className="font-medium">{admin.name}</h4>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-medium">{admin.name}</h4>
+                            <OnlineStatus userId={admin.id} showText size="sm" />
+                          </div>
                           <div className="space-y-1">
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                               <span className="font-medium">Email:</span>
