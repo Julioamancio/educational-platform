@@ -2,15 +2,13 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-  ArrowLeft, 
-  CheckCi
-  PlayCircle
-import { useAu
+import { 
   ArrowLeft, 
   Clock, 
   CheckCircle, 
   Image as ImageIcon,
-  PlayCircle
+  PlayCircle,
+  Question
 } from '@phosphor-icons/react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useKV } from '@github/spark/hooks'
